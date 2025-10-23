@@ -6,6 +6,10 @@ import { Elysia, t } from "elysia";
 import { rateLimit } from "elysia-rate-limit";
 import { z } from "zod";
 import { openai } from "./provider";
+import { conversationsRoutes } from "./routes/conversations";
+import { dialoguesRoutes } from "./routes/dialogues";
+import { profilesRoutes } from "./routes/profiles";
+import { walletRoutes } from "./routes/wallet";
 
 const app = new Elysia()
 	.use(
@@ -17,6 +21,7 @@ const app = new Elysia()
 	.get("/ping", () => "pong")
 	.group("/api/v1", (app) =>
 		app
+			// AI 相关路由
 			.group("/ai", (app) =>
 				app.use(rateLimit({ max: 2 })).post(
 					"/chat_message",
@@ -46,6 +51,11 @@ const app = new Elysia()
 					},
 				),
 			)
+			// 数据相关路由
+			.use(profilesRoutes)
+			.use(walletRoutes)
+			.use(dialoguesRoutes)
+			.use(conversationsRoutes)
 			.onError(async (err) => {
 				return {
 					code: -1,
