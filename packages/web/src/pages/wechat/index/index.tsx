@@ -34,16 +34,17 @@ const WechatIndex = () => {
 						: t("wechatPage.main.title2")}
 				</canBeDetected.span>
 				<div className="flex items-center justify-end">
+					<SearchOutlinedSVG fill="black" width={24} className="mx-4" />
 					<PlusCircleSVG width={16} fill="black" className="cursor-pointer" />
 				</div>
 			</div>
 			<div className="flex flex-1 flex-col overflow-y-auto bg-white">
-				<div className="flex bg-[rgba(237,237,237,1)] px-2 pb-2">
+				{/* <div className="flex bg-[rgba(237,237,237,1)] px-2 pb-2">
 					<div className="flex flex-1 items-center justify-center rounded-[4px] bg-white p-2 text-xs">
 						<SearchOutlinedSVG fill="rgba(0, 0, 0, 0.5)" width={17} height={16} />
 						<span className="ml-2 opacity-50">{t("wechatPage.main.search")}</span>
 					</div>
-				</div>
+				</div> */}
 				<MultipleDeviceLogin />
 				<DialogueList />
 			</div>
