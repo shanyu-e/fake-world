@@ -1,6 +1,13 @@
 import { DataSourceSwitch } from "@/components/DataSourceSwitch";
 import { useDataSourceConfig } from "@/hooks/useDataSourceConfig";
 import {
+	allProfilesAtom,
+	allProfilesErrorAtom,
+	allProfilesLoadingAtom,
+	createProfile,
+	loadAllProfiles,
+} from "@/stateV2/profileV2";
+import {
 	loadWallet,
 	updateWallet,
 	walletAtom,
@@ -15,10 +22,16 @@ export const DataSourceTest: React.FC = () => {
 	const [loading] = useAtom(walletLoadingAtom);
 	const [error] = useAtom(walletErrorAtom);
 
+	// 用户档案状态
+	const [profiles] = useAtom(allProfilesAtom);
+	const [profilesLoading] = useAtom(allProfilesLoadingAtom);
+	const [profilesError] = useAtom(allProfilesErrorAtom);
+
 	const handleModeChange = (mode: "local" | "remote" | "hybrid") => {
 		setMode(mode);
 		// 重新加载数据
 		loadWallet();
+		loadAllProfiles();
 	};
 
 	const handleUpdateWallet = () => {
@@ -29,9 +42,22 @@ export const DataSourceTest: React.FC = () => {
 		});
 	};
 
+	const handleCreateProfile = () => {
+		createProfile({
+			nickname: `测试用户${Date.now()}`,
+			wechat: `test_${Date.now()}`,
+			avatarInfo: "avatar_url_here",
+			remark: "测试备注",
+			momentsBackgroundLike: false,
+			momentsPrivacy: "all",
+			privacy: "all",
+			thumbnailInfo: [],
+		});
+	};
+
 	return (
-		<div className="p-6 max-w-4xl mx-auto">
-			<h1 className="text-2xl font-bold mb-6">数据源测试页面</h1>
+		<div className="mx-auto max-w-4xl p-6">
+			<h1 className="mb-6 font-bold text-2xl">数据源测试页面</h1>
 
 			{/* 数据源切换 */}
 			<div className="mb-6">
@@ -63,6 +89,38 @@ export const DataSourceTest: React.FC = () => {
 					disabled={loading}
 				>
 					更新钱包数据
+				</button>
+			</div>
+
+			{/* 用户档案数据展示 */}
+			<div className="mb-6">
+				<h2 className="text-lg font-semibold mb-3">用户档案数据</h2>
+				<div className="bg-gray-50 p-4 rounded-lg">
+					{profilesLoading && <div className="text-blue-600">加载中...</div>}
+					{profilesError && <div className="text-red-600">错误: {profilesError}</div>}
+					{!profilesLoading && !profilesError && profiles && (
+						<div className="space-y-2">
+							<div>用户总数: {profiles.length}</div>
+							<div className="max-h-40 overflow-y-auto">
+								{profiles.slice(0, 5).map((profile) => (
+									<div key={profile.id} className="text-sm">
+										{profile.nickname} ({profile.wechat})
+									</div>
+								))}
+								{profiles.length > 5 && (
+									<div className="text-gray-500">...还有 {profiles.length - 5} 个用户</div>
+								)}
+							</div>
+						</div>
+					)}
+				</div>
+				<button
+					type="button"
+					onClick={handleCreateProfile}
+					className="mt-3 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+					disabled={profilesLoading}
+				>
+					创建测试用户
 				</button>
 			</div>
 
