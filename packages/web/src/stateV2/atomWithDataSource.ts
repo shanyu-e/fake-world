@@ -26,7 +26,7 @@ export function atomWithDataSource<T>(config: DataSourceAtomConfig<T>) {
 	// 数据同步atom
 	const syncAtom = atom(
 		(get) => get(baseAtom),
-		async (get, set, action) => {
+		async (get, set, action: any) => {
 			set(loadingAtom, true);
 			set(errorAtom, null);
 

@@ -61,7 +61,7 @@ export function createDataSource<T>(
 				offlineMode: config.offlineMode,
 			});
 
-		case "local":
+		// case "local":
 		default:
 			return new LocalDataSource<T>(key);
 	}
