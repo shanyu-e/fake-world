@@ -12,8 +12,6 @@ export type TStateWallet = {
 };
 
 // 创建钱包数据源
-const walletDataSource = dataSources.wallet();
-
 // 创建支持数据源的钱包atom
 const walletAtomConfig = createDataSourceAtom<TStateWallet>(
 	"wallet",
@@ -22,7 +20,7 @@ const walletAtomConfig = createDataSourceAtom<TStateWallet>(
 		miniFund: "1314.00",
 		miniFundYield: "2.75",
 	},
-	walletDataSource,
+	(get) => dataSources.wallet(get),
 	{
 		syncOnMount: true,
 		syncInterval: 30000, // 30秒同步一次

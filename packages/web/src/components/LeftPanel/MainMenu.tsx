@@ -1,4 +1,5 @@
 import { HASH_ASSETS_DB_NAME, hashAssetsDB } from "@/db";
+import { DataSourceTest } from "@/pages/DataSourceTest";
 import { touredAtom } from "@/stateV2/tour";
 import { InfoCircleOutlined } from "@ant-design/icons";
 import { App, Button, Dropdown, Tooltip } from "antd";
@@ -87,6 +88,9 @@ const MainMenu = () => {
 					>
 						开启使用指引
 					</Button>
+				</div>
+				<div>
+					<DataSourceTest />
 				</div>
 			</div>
 		</>

@@ -14,14 +14,11 @@ import type {
 } from "./profile/typing";
 import { mainStore } from "./store";
 
-// 创建用户档案数据源
-const profilesDataSource = dataSources.profiles();
-
 // 创建支持数据源的用户档案atom
 const allProfilesAtomConfig = createDataSourceAtom<TStateAllProfiles>(
 	"allProfiles",
 	[INIT_MY_PROFILE, ...INIT_FRIENDS],
-	profilesDataSource,
+	(get) => dataSources.profiles(get),
 	{
 		syncOnMount: true,
 		syncInterval: 30000, // 30秒同步一次

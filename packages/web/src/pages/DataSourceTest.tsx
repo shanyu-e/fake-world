@@ -98,7 +98,7 @@ export const DataSourceTest: React.FC = () => {
 				<div className="bg-gray-50 p-4 rounded-lg">
 					{profilesLoading && <div className="text-blue-600">加载中...</div>}
 					{profilesError && <div className="text-red-600">错误: {profilesError}</div>}
-					{!profilesLoading && !profilesError && profiles && (
+					{!profilesLoading && !profilesError && profiles && Array.isArray(profiles) && (
 						<div className="space-y-2">
 							<div>用户总数: {profiles.length}</div>
 							<div className="max-h-40 overflow-y-auto">

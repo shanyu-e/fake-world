@@ -13,7 +13,8 @@ export class LocalDataSource<T> implements IDataSource<T> {
 	}
 
 	async getAll(): Promise<T[]> {
-		return this.getAllFromStorage();
+		const allData = this.getAllFromStorage();
+		return allData || [];
 	}
 
 	async create(data: Omit<T, "id">): Promise<T> {

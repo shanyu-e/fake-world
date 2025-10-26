@@ -67,34 +67,35 @@ export function createDataSource<T>(
 	}
 }
 
+import { dataSourceConfigAtom } from "@/stateV2/dataSourceConfig";
+import type { Getter } from "jotai";
+
 // 预定义的数据源
 export const dataSources = {
 	// 用户档案
-	profiles: (config?: Partial<DataSourceConfig>) =>
-		createDataSource<any>("profiles", "/profiles", config),
+	profiles: (get: Getter) =>
+		createDataSource<any>("profiles", "/profiles", get(dataSourceConfigAtom)),
 
 	// 钱包
-	wallet: (config?: Partial<DataSourceConfig>) =>
-		createDataSource<any>("wallet", "/wallet", config),
+	wallet: (get: Getter) => createDataSource<any>("wallet", "/wallet", get(dataSourceConfigAtom)),
 
 	// 对话列表
-	dialogues: (config?: Partial<DataSourceConfig>) =>
-		createDataSource<any>("dialogues", "/dialogues", config),
+	dialogues: (get: Getter) =>
+		createDataSource<any>("dialogues", "/dialogues", get(dataSourceConfigAtom)),
 
 	// 聊天记录
-	conversations: (config?: Partial<DataSourceConfig>) =>
-		createDataSource<any>("conversations", "/conversations", config),
+	conversations: (get: Getter) =>
+		createDataSource<any>("conversations", "/conversations", get(dataSourceConfigAtom)),
 
 	// 朋友圈
-	feeds: (config?: Partial<DataSourceConfig>) => createDataSource<any>("feeds", "/feeds", config),
+	feeds: (get: Getter) => createDataSource<any>("feeds", "/feeds", get(dataSourceConfigAtom)),
 
 	// 交易记录
-	transactions: (config?: Partial<DataSourceConfig>) =>
-		createDataSource<any>("transactions", "/transactions", config),
+	transactions: (get: Getter) =>
+		createDataSource<any>("transactions", "/transactions", get(dataSourceConfigAtom)),
 
 	// 资源文件
-	assets: (config?: Partial<DataSourceConfig>) =>
-		createDataSource<any>("assets", "/assets", config),
+	assets: (get: Getter) => createDataSource<any>("assets", "/assets", get(dataSourceConfigAtom)),
 };
 
 export default dataSources;

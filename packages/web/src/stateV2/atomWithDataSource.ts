@@ -1,18 +1,18 @@
 import type { IDataSource } from "@/data/types/IDataSource";
-import { atom } from "jotai";
+import { type Getter, atom } from "jotai";
 
 // 数据源atom配置
 interface DataSourceAtomConfig<T> {
 	key: string;
 	initialValue: T;
-	dataSource: IDataSource<T>;
+	getDataSource: (get: Getter) => IDataSource<T>;
 	syncOnMount?: boolean;
 	syncInterval?: number;
 }
 
 // 创建支持数据源的atom
 export function atomWithDataSource<T>(config: DataSourceAtomConfig<T>) {
-	const { key, initialValue, dataSource, syncOnMount = true, syncInterval } = config;
+	const { key, initialValue, getDataSource, syncOnMount = true, syncInterval } = config;
 
 	// 基础atom
 	const baseAtom = atom(initialValue);
@@ -47,10 +47,10 @@ export function atomWithDataSource<T>(config: DataSourceAtomConfig<T>) {
 				if (typeof action === "function") {
 					// 如果是函数更新，需要先获取当前值
 					const currentValue = get(baseAtom);
-					await dataSource.update(key, currentValue);
+					await getDataSource(get).update(key, currentValue);
 				} else {
 					// 直接更新
-					await dataSource.update(key, newValue);
+					await getDataSource(get).update(key, newValue);
 				}
 			} catch (error) {
 				console.error(`Error syncing data for key ${key}:`, error);
@@ -67,12 +67,25 @@ export function atomWithDataSource<T>(config: DataSourceAtomConfig<T>) {
 		set(errorAtom, null);
 
 		try {
-			const data = await dataSource.getAll();
-			// 假设数据是数组，取第一个作为当前值
-			if (Array.isArray(data) && data.length > 0) {
-				set(baseAtom, data[0]);
-			}
-		} catch (error) {
+				const data = await getDataSource(get).getAll();
+				if (Array.isArray(initialValue)) {
+					// Collection atom
+					if (Array.isArray(data)) {
+						set(baseAtom, data as T);
+					} else {
+						console.error("Data format error: expected an array, got", data);
+						set(errorAtom, "Data format error: expected an array.");
+						set(baseAtom, [] as unknown as T); // 安全地设置为空数组
+					}
+				} else {
+					// Single item atom
+					if (Array.isArray(data) && data.length > 0) {
+						set(baseAtom, data[0]);
+					} else {
+						set(baseAtom, data as T);
+					}
+				}
+			} catch (error: any) {
 			console.error(`Error loading data for key ${key}:`, error);
 			set(errorAtom, error instanceof Error ? error.message : "Unknown error");
 		} finally {
@@ -86,7 +99,7 @@ export function atomWithDataSource<T>(config: DataSourceAtomConfig<T>) {
 		set(errorAtom, null);
 
 		try {
-			const newItem = await dataSource.create(data);
+			const newItem = await getDataSource(get).create(data);
 			set(baseAtom, newItem);
 			return newItem;
 		} catch (error) {
@@ -104,7 +117,7 @@ export function atomWithDataSource<T>(config: DataSourceAtomConfig<T>) {
 		set(errorAtom, null);
 
 		try {
-			await dataSource.delete(id);
+			await getDataSource(get).delete(id);
 			// 重置为初始值
 			set(baseAtom, initialValue);
 		} catch (error) {
@@ -143,7 +156,7 @@ export function atomWithDataSource<T>(config: DataSourceAtomConfig<T>) {
 export function createDataSourceAtom<T>(
 	key: string,
 	initialValue: T,
-	dataSource: IDataSource<T>,
+	getDataSource: (get: Getter) => IDataSource<T>,
 	options: {
 		syncOnMount?: boolean;
 		syncInterval?: number;
@@ -152,7 +165,7 @@ export function createDataSourceAtom<T>(
 	return atomWithDataSource({
 		key,
 		initialValue,
-		dataSource,
+		getDataSource,
 		...options,
 	});
 }
