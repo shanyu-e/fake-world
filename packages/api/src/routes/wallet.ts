@@ -16,7 +16,20 @@ const createResponse = <T>(data: T, message = "Success", code = 0): ApiResponse<
 });
 
 export const walletRoutes = new Elysia({ prefix: "/wallet" })
-	// 获取钱包信息
+	// 获取所有钱包信息
+	.get("/", async () => {
+		try {
+			const wallets = await prisma.wallet.findMany({
+				orderBy: {
+					createdAt: "desc",
+				},
+			});
+			return createResponse(wallets);
+		} catch (error) {
+			return createResponse(null, "Failed to fetch wallets", -1);
+		}
+	})
+	// 获取单个钱包信息
 	.get("/:profileId", async ({ params }) => {
 		try {
 			let wallet = await prisma.wallet.findUnique({

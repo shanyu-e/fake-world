@@ -1,7 +1,9 @@
 import "./shim";
+import { resolve } from "node:path";
 import { cors } from "@elysiajs/cors";
 import { streamObject } from "ai";
 import { env } from "bun";
+import { config } from "dotenv";
 import { Elysia, t } from "elysia";
 import { rateLimit } from "elysia-rate-limit";
 import { z } from "zod";
@@ -10,6 +12,9 @@ import { conversationsRoutes } from "./routes/conversations";
 import { dialoguesRoutes } from "./routes/dialogues";
 import { profilesRoutes } from "./routes/profiles";
 import { walletRoutes } from "./routes/wallet";
+
+// 加载环境变量 - 确保从项目根目录加载
+config({ path: resolve(import.meta.dir, "..", ".env.local") });
 
 const app = new Elysia()
 	.use(

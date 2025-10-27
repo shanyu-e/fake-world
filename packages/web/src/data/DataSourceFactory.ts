@@ -76,8 +76,12 @@ export const dataSources = {
 	profiles: (get: Getter) =>
 		createDataSource<any>("profiles", "/profiles", get(dataSourceConfigAtom)),
 
-	// 钱包
+	// 钱包（单个）
 	wallet: (get: Getter) => createDataSource<any>("wallet", "/wallet", get(dataSourceConfigAtom)),
+
+	// 所有钱包
+	allWallets: (get: Getter) =>
+		createDataSource<any>("allWallets", "/wallet", get(dataSourceConfigAtom)),
 
 	// 对话列表
 	dialogues: (get: Getter) =>

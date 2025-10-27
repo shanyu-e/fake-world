@@ -12,7 +12,7 @@ export type TStateWallet = {
 };
 
 // 创建钱包数据源
-// 创建支持数据源的钱包atom
+// 创建支持数据源的钱包atom（单个钱包）
 const walletAtomConfig = createDataSourceAtom<TStateWallet>(
 	"wallet",
 	{
@@ -34,6 +34,24 @@ export const walletLoadAtom = walletAtomConfig.loadAtom;
 export const walletCreateAtom = walletAtomConfig.createAtom;
 export const walletDeleteAtom = walletAtomConfig.deleteAtom;
 
+// 创建支持数据源的所有钱包atom（钱包列表）
+const allWalletsAtomConfig = createDataSourceAtom<TStateWallet[]>(
+	"allWallets",
+	[],
+	(get) => dataSources.allWallets(get),
+	{
+		syncOnMount: false, // 不自动加载
+		syncInterval: 30000,
+	},
+);
+
+export const allWalletsAtom = allWalletsAtomConfig.atom;
+export const allWalletsLoadingAtom = allWalletsAtomConfig.loadingAtom;
+export const allWalletsErrorAtom = allWalletsAtomConfig.errorAtom;
+export const allWalletsLoadAtom = allWalletsAtomConfig.loadAtom;
+export const allWalletsCreateAtom = allWalletsAtomConfig.createAtom;
+export const allWalletsDeleteAtom = allWalletsAtomConfig.deleteAtom;
+
 // 兼容性函数
 export const getWalletVauleSnapshot = () => mainStore.get(walletAtom);
 
@@ -44,4 +62,9 @@ export const updateWallet = (data: Partial<TStateWallet>) => {
 
 export const loadWallet = () => {
 	mainStore.set(walletLoadAtom);
+};
+
+// 加载所有钱包数据
+export const loadAllWallets = () => {
+	mainStore.set(allWalletsLoadAtom);
 };

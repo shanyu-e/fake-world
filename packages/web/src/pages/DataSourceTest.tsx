@@ -8,6 +8,10 @@ import {
 	loadAllProfiles,
 } from "@/stateV2/profileV2";
 import {
+	allWalletsAtom,
+	allWalletsErrorAtom,
+	allWalletsLoadingAtom,
+	loadAllWallets,
 	loadWallet,
 	updateWallet,
 	walletAtom,
@@ -21,6 +25,11 @@ export const DataSourceTest: React.FC = () => {
 	const [wallet] = useAtom(walletAtom);
 	const [loading] = useAtom(walletLoadingAtom);
 	const [error] = useAtom(walletErrorAtom);
+
+	// 所有钱包状态
+	const [allWallets] = useAtom(allWalletsAtom);
+	const [allWalletsLoading] = useAtom(allWalletsLoadingAtom);
+	const [allWalletsError] = useAtom(allWalletsErrorAtom);
 
 	// 用户档案状态
 	const [profiles] = useAtom(allProfilesAtom);
@@ -70,7 +79,7 @@ export const DataSourceTest: React.FC = () => {
 
 			{/* 钱包数据展示 */}
 			<div className="mb-6">
-				<h2 className="text-lg font-semibold mb-3">钱包数据</h2>
+				<h2 className="text-lg font-semibold mb-3">钱包数据（单个）</h2>
 				<div className="bg-gray-50 p-4 rounded-lg">
 					{loading && <div className="text-blue-600">加载中...</div>}
 					{error && <div className="text-red-600">错误: {error}</div>}
@@ -89,6 +98,40 @@ export const DataSourceTest: React.FC = () => {
 					disabled={loading}
 				>
 					更新钱包数据
+				</button>
+			</div>
+
+			{/* 所有钱包数据展示 */}
+			<div className="mb-6">
+				<h2 className="text-lg font-semibold mb-3">所有钱包数据</h2>
+				<div className="bg-gray-50 p-4 rounded-lg">
+					{allWalletsLoading && <div className="text-blue-600">加载中...</div>}
+					{allWalletsError && <div className="text-red-600">错误: {allWalletsError}</div>}
+					{!allWalletsLoading && !allWalletsError && allWallets && Array.isArray(allWallets) && (
+						<div className="space-y-2">
+							<div>钱包总数: {allWallets.length}</div>
+							<div className="max-h-60 overflow-y-auto">
+								{allWallets.slice(0, 10).map((wallet, index) => (
+									<div key={index} className="text-sm border-b pb-2 mb-2">
+										<div>余额: {wallet.balance}</div>
+										<div>零钱通: {wallet.miniFund}</div>
+										<div>收益率: {wallet.miniFundYield}%</div>
+									</div>
+								))}
+								{allWallets.length > 10 && (
+									<div className="text-gray-500">...还有 {allWallets.length - 10} 个钱包</div>
+								)}
+							</div>
+						</div>
+					)}
+				</div>
+				<button
+					type="button"
+					onClick={loadAllWallets}
+					className="mt-3 px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600"
+					disabled={allWalletsLoading}
+				>
+					加载所有钱包数据
 				</button>
 			</div>
 
