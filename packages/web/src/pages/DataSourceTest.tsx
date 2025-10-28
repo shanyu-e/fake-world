@@ -51,17 +51,23 @@ export const DataSourceTest: React.FC = () => {
 		});
 	};
 
-	const handleCreateProfile = () => {
-		createProfile({
-			nickname: `测试用户${Date.now()}`,
-			wechat: `test_${Date.now()}`,
-			avatarInfo: "avatar_url_here",
-			remark: "测试备注",
-			momentsBackgroundLike: false,
-			momentsPrivacy: "all",
-			privacy: "all",
-			thumbnailInfo: [],
-		});
+	const handleCreateProfile = async () => {
+		try {
+			await createProfile({
+				nickname: `测试用户${Date.now()}`,
+				wechat: `test_${Date.now()}`,
+				avatarInfo: "avatar_url_here",
+				remark: "测试备注",
+				momentsBackgroundLike: false,
+				momentsPrivacy: "all",
+				privacy: "all",
+				thumbnailInfo: [],
+			});
+			// 创建成功后刷新列表
+			loadAllProfiles();
+		} catch (error) {
+			console.error("创建用户档案失败:", error);
+		}
 	};
 
 	return (

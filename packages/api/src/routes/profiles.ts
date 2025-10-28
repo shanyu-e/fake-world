@@ -81,6 +81,10 @@ export const profilesRoutes = new Elysia({ prefix: "/profiles" })
 				avatarInfo: t.Optional(t.String()),
 				wechat: t.String(),
 				// 其他可选字段...
+				momentsBackgroundLike: t.Optional(t.Boolean()),
+				momentsPrivacy: t.Optional(t.String()),
+				privacy: t.Optional(t.String()),
+				thumbnailInfo: t.Optional(t.Array(t.String())),
 			}),
 		},
 	)

@@ -6,6 +6,7 @@ import { focusAtom } from "jotai-optics";
 import { atomFamily, selectAtom } from "jotai/utils";
 import type { OpticFor_ } from "optics-ts";
 import { createDataSourceAtom } from "./atomWithDataSource";
+import { dataSourceConfigAtom } from "./dataSourceConfig";
 import { debounceGenerateNameAnchorGroup, type generateNameAnchorGroup } from "./profile/helpers";
 import type {
 	IStateProfile,
@@ -124,12 +125,24 @@ export const loadAllProfiles = () => {
 	mainStore.set(allProfilesLoadAtom);
 };
 
-export const createProfile = (profile: Omit<IStateProfile, "id">) => {
-	// 创建单个用户档案，然后添加到列表中
-	const newProfile = { ...profile, id: crypto.randomUUID() } as IStateProfile;
-	const currentProfiles = mainStore.get(allProfilesAtom);
-	mainStore.set(allProfilesAtom, [...currentProfiles, newProfile]);
-	return newProfile;
+export const createProfile = async (profile: Omit<IStateProfile, "id">) => {
+	try {
+		// 创建一个临时的 getter 函数来获取配置
+		const getConfig = () => mainStore.get(dataSourceConfigAtom);
+		const dataSource = dataSources.profiles(getConfig);
+
+		// 创建用户档案
+		const newProfile = (await dataSource.create(profile)) as IStateProfile;
+
+		// 更新本地状态：添加到列表的开头
+		const currentProfiles = mainStore.get(allProfilesAtom);
+		mainStore.set(allProfilesAtom, [newProfile, ...currentProfiles]);
+
+		return newProfile;
+	} catch (error) {
+		console.error("Failed to create profile:", error);
+		throw error;
+	}
 };
 
 export const updateProfile = (id: IStateProfile["id"], data: Partial<IStateProfile>) => {
