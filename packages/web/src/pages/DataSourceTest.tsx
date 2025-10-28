@@ -13,6 +13,7 @@ import {
   walletLoadingAtom,
 } from "@/stateV2/walletV2";
 import { useAtom } from "jotai";
+import { useEffect } from "react";
 
 export const DataSourceTest: React.FC = () => {
   const { config, setMode } = useDataSourceConfig();
@@ -35,6 +36,11 @@ export const DataSourceTest: React.FC = () => {
     // 重新加载数据
     await Promise.all([loadWallet(), loadAllProfiles()]);
   };
+
+  useEffect(() => {
+    loadWallet();
+    loadAllProfiles();
+  }, [config.mode]);
 
   const handleUpdateWallet = () => {
     updateWallet({
