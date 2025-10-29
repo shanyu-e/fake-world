@@ -48,7 +48,7 @@ export const allWalletsCreateAtom = allWalletsAtomConfig.createAtom;
 export const allWalletsDeleteAtom = allWalletsAtomConfig.deleteAtom;
 
 // 兼容性函数
-export const getWalletVauleSnapshot = () => mainStore.get(walletAtom);
+export const getWalletValueSnapshot = () => mainStore.get(walletAtom);
 
 // 新的钱包操作函数
 export const updateWallet = (data: Partial<TStateWallet>) => {
