@@ -6,7 +6,7 @@ import TopOperations from "@/components/TopOperations";
 import { conversationListAtom } from "@/stateV2/conversation";
 import { EMetaDataType } from "@/stateV2/detectedNode";
 import { type IDialogueItem, dialogueItemAtom, dialogueListAtom } from "@/stateV2/dialogueList";
-import { profileAtom } from "@/stateV2/profile";
+import { profileAtom } from "@/stateV2/profileV2";
 import { Modal } from "antd";
 import { useAtomValue, useSetAtom } from "jotai";
 import { RESET } from "jotai/utils";
