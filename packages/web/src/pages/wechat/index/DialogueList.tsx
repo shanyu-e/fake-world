@@ -22,7 +22,7 @@ const DialogueList = () => {
 
   useEffect(() => {
     dialogueLoadList();
-  }, []);
+  }, [dialogueList]);
 
   return (
     <canBeDetected.section
