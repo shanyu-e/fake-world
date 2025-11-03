@@ -88,6 +88,9 @@ export const dialogueListEffect = atomEffect((get, set) => {
 
 export const getDialogueListValueSnapshot = () => mainStore.get(dialogueListAtom);
 export const setDialogueListValue = (args: SetStateAction<TStateDialogueList>) => mainStore.set(dialogueListAtom, args);
+export const loadAllDialogue = async () => {
+  return await mainStore.set(dialogueListLoadAtom);
+};
 
 export const dialogueItemAtom = atomFamily(
   (id: IDialogueItem["id"]) => focusAtom(dialogueListAtom, (optic: OpticFor_<TStateDialogueList>) => optic.find((v) => v.id === id)),

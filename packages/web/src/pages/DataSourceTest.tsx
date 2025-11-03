@@ -34,18 +34,15 @@ export const DataSourceTest: React.FC = () => {
   const handleModeChange = async (mode: "local" | "remote" | "hybrid") => {
     setMode(mode);
     // 重新加载数据
-    await Promise.all([loadWallet(), loadAllProfiles()]);
+    await Promise.all([loadWallet(), loadAllWallets(), loadAllProfiles()]);
   };
-
-  // useEffect(() => {
-  //   setMode(config.mode);
-  //   loadWallet();
-  //   loadAllProfiles();
-  // }, [config.mode]);
 
   useEffect(() => {
     setMode(config.mode);
-  }, [config.mode]);
+    // loadWallet();
+    // loadAllWallets();
+    // loadAllProfiles();
+  }, [config.mode, setMode]);
 
   const handleUpdateWallet = () => {
     updateWallet({
