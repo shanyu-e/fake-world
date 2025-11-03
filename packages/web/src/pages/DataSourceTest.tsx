@@ -37,9 +37,14 @@ export const DataSourceTest: React.FC = () => {
     await Promise.all([loadWallet(), loadAllProfiles()]);
   };
 
+  // useEffect(() => {
+  //   setMode(config.mode);
+  //   loadWallet();
+  //   loadAllProfiles();
+  // }, [config.mode]);
+
   useEffect(() => {
-    loadWallet();
-    loadAllProfiles();
+    setMode(config.mode);
   }, [config.mode]);
 
   const handleUpdateWallet = () => {

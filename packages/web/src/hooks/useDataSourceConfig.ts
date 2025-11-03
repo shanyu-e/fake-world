@@ -12,7 +12,7 @@ interface DataSourceConfig {
 }
 
 const defaultConfig: DataSourceConfig = {
-	mode: "local",
+	mode: "remote",
 	apiBaseUrl: import.meta.env.VITE_API_URL || "http://localhost:9000",
 	syncInterval: 30000,
 	offlineMode: false,

@@ -25,6 +25,9 @@ const DialogueItem = ({ itemId, className }: Props) => {
   const { friendId, id, isPinned, unreadDisplayType, unreadMarkNumber, isMuted, badgeHide, lastMessage, lastMessageTime } = useAtomValue(
     dialogueItemAtom(itemId)
   )!;
+  if (friendId === "b0cfb3c9-5b66-46be-abfe-dc67f79e497a") {
+    console.log(friendId, "friendId");
+  }
   const friendProfile = useAtomValue(profileAtom(friendId))!;
   const setConversationList = useSetAtom(conversationListAtom(friendId));
   const setDialogueList = useSetAtom(dialogueListAtom);
