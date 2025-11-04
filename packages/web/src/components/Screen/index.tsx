@@ -30,6 +30,7 @@ const Screen = () => {
 			/>
 			<DetectedOverall />
 			{isDesktop && <StatusBar />}
+			{isMobileOnly && <StatusBar />}
 			<ErrorBoundary FallbackComponent={Fallback}>
 				<Outlet />
 			</ErrorBoundary>

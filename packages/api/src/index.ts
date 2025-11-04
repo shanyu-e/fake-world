@@ -16,7 +16,11 @@ import { walletRoutes } from "./routes/wallet";
 // 加载环境变量 - 确保从项目根目录加载
 config({ path: resolve(import.meta.dir, "..", ".env.local") });
 
-const app = new Elysia()
+const app = new Elysia({
+	serve: {
+		hostname: "0.0.0.0",
+	},
+})
 	.use(
 		cors({
 			methods: ["POST", "GET"],
