@@ -3,7 +3,7 @@ import TopOperations from "@/components/TopOperations";
 import useModeNavigate from "@/components/useModeNavigate";
 import { MYSELF_ID } from "@/faker/wechat/user";
 import { EMetaDataType } from "@/stateV2/detectedNode";
-import { dialogueListAtom } from "@/stateV2/dialogueList";
+import { type TStateDialogueList, dialogueListAtom } from "@/stateV2/dialogueList";
 import { feedListAtom } from "@/stateV2/moments";
 import { setAllProfilesValue } from "@/stateV2/profile";
 import List from "@/wechatComponents/List";
@@ -32,8 +32,8 @@ const UserItem = ({
 			content: "删除好友会同时删除与该好友的对话、该好友的朋友圈",
 			onOk: () => {
 				setAllProfilesValue((pv) => pv.filter((v) => v.id !== id));
-				setDialogueList((pv) => pv.filter((v) => v.friendId !== id));
-				setFeedList((pv) => pv.filter((v) => v.userId !== id));
+				setDialogueList((pv: TStateDialogueList) => pv.filter((v) => v.friendId !== id));
+				setFeedList((pv: any) => pv.filter((v: any) => v.userId !== id));
 			},
 		});
 	};

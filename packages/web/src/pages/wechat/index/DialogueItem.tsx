@@ -5,7 +5,7 @@ import { canBeDetected } from "@/components/NodeDetected";
 import TopOperations from "@/components/TopOperations";
 import { conversationListAtom } from "@/stateV2/conversation";
 import { EMetaDataType } from "@/stateV2/detectedNode";
-import { type IDialogueItem, dialogueItemAtom, dialogueListAtom } from "@/stateV2/dialogueList";
+import { type IDialogueItem, type TStateDialogueList, dialogueItemAtom, dialogueListAtom } from "@/stateV2/dialogueList";
 import { profileAtom } from "@/stateV2/profileV2";
 import { Modal } from "antd";
 import { useAtomValue, useSetAtom } from "jotai";
@@ -41,7 +41,7 @@ const DialogueItem = ({ itemId, className }: Props) => {
       title: "是否删除该对话项？",
       content: "这将删除与该对话的聊天记录",
       onOk: () => {
-        setDialogueList((prev: any) => prev.filter((v: any) => v.id !== id));
+        setDialogueList((prev: TStateDialogueList) => prev.filter((v: IDialogueItem) => v.id !== id));
         setConversationList(RESET);
       },
     });
