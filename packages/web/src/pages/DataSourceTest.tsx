@@ -42,13 +42,6 @@ export const DataSourceTest: React.FC = () => {
 		await Promise.all([loadWallet(), loadAllWallets(), loadAllProfiles()]);
 	};
 
-	// useEffect(() => {
-	// setMode(config.mode);
-	// loadWallet();
-	// loadAllWallets();
-	// loadAllProfiles();
-	// }, [config.mode, setMode]);
-
 	const handleUpdateWallet = () => {
 		updateWallet({
 			balance: (Math.random() * 1000).toFixed(2),
@@ -81,17 +74,17 @@ export const DataSourceTest: React.FC = () => {
 
 			{/* 数据源切换 */}
 			<div className="mb-6">
-				<h2 className="text-lg font-semibold mb-3">数据源配置</h2>
+				<h2 className="mb-3 font-semibold text-lg">数据源配置</h2>
 				<div className="flex items-center space-x-4">
 					<DataSourceSwitch currentMode={config.mode} onModeChange={handleModeChange} />
-					<span className="text-sm text-gray-500">当前模式: {config.mode}</span>
+					<span className="text-gray-500 text-sm">当前模式: {config.mode}</span>
 				</div>
 			</div>
 
 			{/* 钱包数据展示 */}
 			<div className="mb-6">
-				<h2 className="text-lg font-semibold mb-3">钱包数据（单个）</h2>
-				<div className="bg-gray-50 p-4 rounded-lg">
+				<h2 className="mb-3 font-semibold text-lg">钱包数据（单个）</h2>
+				<div className="rounded-lg bg-gray-50 p-4">
 					{loading && <div className="text-blue-600">加载中...</div>}
 					{error && <div className="text-red-600">错误: {error}</div>}
 					{!loading && !error && wallet && (
@@ -105,7 +98,7 @@ export const DataSourceTest: React.FC = () => {
 				<button
 					type="button"
 					onClick={handleUpdateWallet}
-					className="mt-3 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+					className="mt-3 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
 					disabled={loading}
 				>
 					更新钱包数据
@@ -114,8 +107,8 @@ export const DataSourceTest: React.FC = () => {
 
 			{/* 所有钱包数据展示 */}
 			<div className="mb-6">
-				<h2 className="text-lg font-semibold mb-3">所有钱包数据</h2>
-				<div className="bg-gray-50 p-4 rounded-lg">
+				<h2 className="mb-3 font-semibold text-lg">所有钱包数据</h2>
+				<div className="rounded-lg bg-gray-50 p-4">
 					{allWalletsLoading && <div className="text-blue-600">加载中...</div>}
 					{allWalletsError && <div className="text-red-600">错误: {allWalletsError}</div>}
 					{!allWalletsLoading && !allWalletsError && allWallets && Array.isArray(allWallets) && (
@@ -123,7 +116,7 @@ export const DataSourceTest: React.FC = () => {
 							<div>钱包总数: {allWallets.length}</div>
 							<div className="max-h-60 overflow-y-auto">
 								{allWallets.slice(0, 10).map((wallet, index) => (
-									<div key={index} className="text-sm border-b pb-2 mb-2">
+									<div key={index} className="mb-2 border-b pb-2 text-sm">
 										<div>余额: {wallet.balance}</div>
 										<div>零钱通: {wallet.miniFund}</div>
 										<div>收益率: {wallet.miniFundYield}%</div>
@@ -139,7 +132,7 @@ export const DataSourceTest: React.FC = () => {
 				<button
 					type="button"
 					onClick={loadAllWallets}
-					className="mt-3 px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600"
+					className="mt-3 rounded bg-purple-500 px-4 py-2 text-white hover:bg-purple-600"
 					disabled={allWalletsLoading}
 				>
 					加载所有钱包数据
@@ -148,8 +141,8 @@ export const DataSourceTest: React.FC = () => {
 
 			{/* 用户档案数据展示 */}
 			<div className="mb-6">
-				<h2 className="text-lg font-semibold mb-3">用户档案数据</h2>
-				<div className="bg-gray-50 p-4 rounded-lg">
+				<h2 className="mb-3 font-semibold text-lg">用户档案数据</h2>
+				<div className="rounded-lg bg-gray-50 p-4">
 					{profilesLoading && <div className="text-blue-600">加载中...</div>}
 					{profilesError && <div className="text-red-600">错误: {profilesError}</div>}
 					{!profilesLoading && !profilesError && profiles && Array.isArray(profiles) && (
@@ -171,7 +164,7 @@ export const DataSourceTest: React.FC = () => {
 				<button
 					type="button"
 					onClick={handleCreateProfile}
-					className="mt-3 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+					className="mt-3 rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600"
 					disabled={profilesLoading}
 				>
 					创建测试用户
@@ -180,16 +173,16 @@ export const DataSourceTest: React.FC = () => {
 
 			{/* 配置信息 */}
 			<div className="mb-6">
-				<h2 className="text-lg font-semibold mb-3">当前配置</h2>
-				<div className="bg-gray-50 p-4 rounded-lg">
+				<h2 className="mb-3 font-semibold text-lg">当前配置</h2>
+				<div className="rounded-lg bg-gray-50 p-4">
 					<pre className="text-sm">{JSON.stringify(config, null, 2)}</pre>
 				</div>
 			</div>
 
 			{/* 使用说明 */}
 			<div className="mb-6">
-				<h2 className="text-lg font-semibold mb-3">使用说明</h2>
-				<div className="space-y-2 text-sm text-gray-600">
+				<h2 className="mb-3 font-semibold text-lg">使用说明</h2>
+				<div className="space-y-2 text-gray-600 text-sm">
 					<div>
 						<strong>本地存储模式:</strong> 数据存储在浏览器 localStorage 中
 					</div>
