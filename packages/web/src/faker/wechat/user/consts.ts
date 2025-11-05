@@ -1,6 +1,6 @@
 import type { IStateProfile, TStateAllProfiles } from "@/stateV2/profile";
 
-export const MYSELF_ID = "0";
+export const MYSELF_ID = "16651e6f-905f-4192-8c25-270e96edc899";
 
 export const INIT_MY_PROFILE: IStateProfile = {
   id: MYSELF_ID,
