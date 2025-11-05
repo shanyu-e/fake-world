@@ -25,7 +25,7 @@ export const profilesRoutes = new Elysia({ prefix: "/profiles" })
 					wallet: true,
 				},
 				orderBy: {
-					createdAt: "desc",
+					createdAt: "asc",
 				},
 			});
 			return createResponse(profiles);
