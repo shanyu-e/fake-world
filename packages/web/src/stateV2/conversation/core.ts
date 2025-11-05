@@ -11,23 +11,15 @@ import type { TConversationItem } from "./typing";
 export type TStateConversationList = TConversationItem[];
 
 export const conversationListAtom = atomFamily((id: IStateProfile["id"]) => {
-	return atomWithStorage<TStateConversationList>(
-		`conversationList-${id}`,
-		MOCK_INIT_CONVERSATION_LIST,
-	);
+  return atomWithStorage<TStateConversationList>(`conversationList-${id}`, MOCK_INIT_CONVERSATION_LIST);
 });
 
-export const getConversationListValueSnapshot = (id: IStateProfile["id"]) =>
-	mainStore.get(conversationListAtom(id));
-export const setConversationListValue = (
-	id: IStateProfile["id"],
-	params: SetStateAction<TStateConversationList>,
-) => mainStore.set(conversationListAtom(id), params);
+export const getConversationListValueSnapshot = (id: IStateProfile["id"]) => mainStore.get(conversationListAtom(id));
+export const setConversationListValue = (id: IStateProfile["id"], params: SetStateAction<TStateConversationList>) =>
+  mainStore.set(conversationListAtom(id), params);
 
 export const conversationItemReferenceAtom = atomFamily(
-	(params: { friendId: IStateProfile["id"]; conversationId: TConversationItem["id"] }) =>
-		focusAtom(conversationListAtom(params.friendId), (optic) =>
-			optic.find((v) => v.id === params.conversationId),
-		),
-	dequal,
+  (params: { friendId: IStateProfile["id"]; conversationId: TConversationItem["id"] }) =>
+    focusAtom(conversationListAtom(params.friendId), (optic) => optic.find((v) => v.id === params.conversationId)),
+  dequal
 );
