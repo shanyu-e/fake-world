@@ -3,9 +3,10 @@ import useMode from "@/components/useMode";
 import { EMetaDataType, allNodesTreeAtom } from "@/stateV2/detectedNode";
 import { dialogueListAtom, dialogueListEffect } from "@/stateV2/dialogueList";
 import { useAtom, useSetAtom } from "jotai";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { ReactSortable } from "react-sortablejs";
 import DialogueItem from "./DialogueItem";
+import { loadAllConversations } from "@/stateV2/conversation";
 
 const DialogueList = () => {
   const { isEdit } = useMode();
@@ -18,6 +19,14 @@ const DialogueList = () => {
       id: item.id,
     }));
   }, [dialogueList]);
+
+  useEffect(() => {
+    try {
+      loadAllConversations(); // 触发 mainStore.set(allConversationListLoadAtom)
+    } catch (e) {
+      console.error("加载会话列表失败:", e);
+    }
+  }, []);
 
   return (
     <canBeDetected.section

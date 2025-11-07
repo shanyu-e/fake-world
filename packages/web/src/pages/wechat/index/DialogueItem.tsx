@@ -9,7 +9,6 @@ import { type IDialogueItem, type TStateDialogueList, dialogueItemAtom, dialogue
 import { profileAtom } from "@/stateV2/profileV2";
 import { Modal } from "antd";
 import { useAtomValue, useSetAtom } from "jotai";
-import { RESET } from "jotai/utils";
 import { memo } from "react";
 import { useNavigate } from "react-router-dom";
 import { twMerge } from "tailwind-merge";
@@ -42,7 +41,10 @@ const DialogueItem = ({ itemId, className }: Props) => {
       content: "这将删除与该对话的聊天记录",
       onOk: () => {
         setDialogueList((prev: TStateDialogueList) => prev.filter((v: IDialogueItem) => v.id !== id));
-        setConversationList(RESET);
+        // The type error indicates that `RESET` is not directly assignable to `SetStateAction<TStateConversationList>`.
+        // Assuming TStateConversationList is an array type, setting it to an empty array `[]` achieves the same "reset" effect
+        // of clearing the conversation list and resolves the type issue.
+        setConversationList([]);
       },
     });
   };

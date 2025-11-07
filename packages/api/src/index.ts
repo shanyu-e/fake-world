@@ -23,7 +23,7 @@ const app = new Elysia({
 })
 	.use(
 		cors({
-			methods: ["POST", "GET"],
+			methods: ["POST", "GET", "PUT"],
 			allowedHeaders: ["Content-Type"],
 		}),
 	)
