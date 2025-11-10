@@ -8,7 +8,6 @@ import { MOCK_INIT_CONVERSATION_LIST } from "./consts";
 import type { TConversationItem } from "./typing";
 import { createDataSourceAtom } from "../atomWithDataSource";
 import dataSources from "@/data/DataSourceFactory";
-import atomWithStorage from "../atomWithStorage";
 import { dataSourceConfigAtom } from "../dataSourceConfig";
 import { EConversationType } from "./typing";
 import type { Descendant } from "slate";
@@ -37,7 +36,6 @@ const allConversationListAtom = allConversationListAtomConfig.atom;
 // 为每个 friendId 创建独立的 atom，优先从 allConversationListAtom 读取，如果没有则从本地存储读取
 export const conversationListAtom = atomFamily((id: IStateProfile["id"]) => {
   // 本地存储的 atom（作为后备）
-  const localAtom = atomWithStorage<TStateConversationList>(`conversationList-${id}`, MOCK_INIT_CONVERSATION_LIST);
 
   // 合并 atom：优先使用远程数据，如果远程数据中不存在该 friendId，则使用本地存储
   return atom(
@@ -48,12 +46,10 @@ export const conversationListAtom = atomFamily((id: IStateProfile["id"]) => {
       if (Array.isArray(remoteData)) {
         return remoteData;
       }
-      // 否则使用本地存储
-      return get(localAtom);
     },
     (get, set, update: SetStateAction<TStateConversationList>) => {
       const allConversations = get(allConversationListAtom);
-      const currentValue = allConversations?.[id] ?? get(localAtom);
+      const currentValue = allConversations?.[id];
       const newValue = typeof update === "function" ? (update as (prev: TStateConversationList) => TStateConversationList)(currentValue) : update;
 
       // 更新远程 atom（更新整个对象）
@@ -61,8 +57,6 @@ export const conversationListAtom = atomFamily((id: IStateProfile["id"]) => {
         ...allConversations,
         [id]: newValue,
       });
-      // 同时更新本地存储
-      set(localAtom, newValue);
     }
   );
 }, dequal);
@@ -87,6 +81,7 @@ export const loadAllConversations = async () => {
     // 基础字段映射
     const base = {
       id: String(raw.id),
+      dialogueId: String(raw.dialogueId),
       role: raw.role,
       upperText: raw.upperText ?? undefined,
       sendTimestamp: raw.sendTimestamp ?? undefined,

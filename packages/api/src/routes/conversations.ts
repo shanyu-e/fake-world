@@ -136,21 +136,50 @@ export const conversationsRoutes = new Elysia({ prefix: "/conversations" })
 		"/:id",
 		async ({ params, body }) => {
 			try {
-				const conversation = await prisma.conversation.update({
-					where: { id: params.id },
-					data: body,
-				});
+				const updatedConversations = [];
+				for (const key in body) {
+					if (body[key] === undefined) {
+						delete body[key];
+						continue;
+					}
+					for (const item of body[key]) {
+						const conversation = await prisma.conversation.update({
+							where: { id: item.id, dialogueId: item.dialogueId },
+							data: {
+								role: item.role,
+								type: item.type,
+								upperText: item.upperText,
+								sendTimestamp: item.sendTimestamp,
+								content: item.textContent,
+								referenceId: item.referenceId,
+							},
+						});
+						updatedConversations.push(conversation);
+					}
+				}
 
-				return createResponse(conversation, "Message updated successfully");
+				return createResponse(updatedConversations, "Messages updated successfully");
 			} catch (error) {
 				return createResponse(null, "Failed to update message", -1);
 			}
 		},
 		{
-			body: t.Object({
-				content: t.Optional(t.Any()),
-				upperText: t.Optional(t.String()),
-			}),
+			body: t.Record(
+				t.String(), // 键类型：IStateProfile["id"] (字符串)
+				t.Array(
+					t.Object({
+						id: t.String(),
+						dialogueId: t.String(),
+						type: t.String(),
+						role: t.String(),
+						upperText: t.Optional(t.String()),
+						sendTimestamp: t.Optional(t.Number()),
+						// 根据 TConversationItem 类型添加其他可能的字段
+						textContent: t.Optional(t.Any()),
+						referenceId: t.Optional(t.String()),
+					}),
+				), // 值类型：TStateConversationList (TConversationItem[])
+			),
 		},
 	)
 
