@@ -85,13 +85,18 @@ export const ConversationAPIProvider = ({ children }: PropsWithChildren) => {
     const value = getInputterValueSnapshot();
     if (isEqual(value, SLATE_INITIAL_VALUE)) return;
     setConversationListValue(conversationId, (prev) => {
+      // 找出prev中最大的dialogueId（数字字符串）
+      const maxDialogueId = Math.max(...prev.map((item) => Number(item.dialogueId))) + 1;
+      // 找出prev对应的id
+      const id = prev.find((item) => item.dialogueId === "1".toString())?.id;
       return [
         ...prev,
         {
           type: EConversationType.text,
           role: sendRole,
           textContent: value,
-          id: nanoid(8),
+          id: id,
+          dialogueId: maxDialogueId.toString(),
           sendTimestamp: dayjs().valueOf(),
           upperText: fromLastGenerateUpperText(prev),
         },

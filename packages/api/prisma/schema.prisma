@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -11,47 +8,43 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// 用户档案表
 model Profile {
-  id                        String   @id
-  nickname                  String
-  remark                    String?
-  avatarInfo                String?
-  momentsBackgroundInfo     String?
-  momentsBackgroundLike     Boolean  @default(false)
-  momentsPrivacy            String   @default("all")
-  tickleText                String?
-  wechat                    String   @unique
-  coin                      Int      @default(0)
-  isStarred                 Boolean  @default(false)
-  gender                    String?
-  hideGender                Boolean  @default(false)
-  phone                     String[]
-  tags                      String[]
-  description               String?
-  area                      String?
-  signature                 String?
-  privacy                   String   @default("all")
-  thumbnailInfo             String[]
-  hideThumbnail             Boolean  @default(false)
-  createdByFaker            Boolean  @default(false)
-  createdAt                 DateTime @default(now())
-  updatedAt                 DateTime @updatedAt
-
-  // 关系
-  wallet                    Wallet?
-  dialogues                 Dialogue[] @relation("ProfileDialogues")
-  friendDialogues           Dialogue[] @relation("FriendDialogues")
-  feeds                     Feed[]
-  transactions              Transaction[]
-  assets                    Asset[]
-  feedComments              FeedComment[]
-  likedFeeds                Feed[] @relation("FeedLikes")
+  id                    String        @id
+  nickname              String
+  remark                String?
+  avatarInfo            String?
+  momentsBackgroundInfo String?
+  momentsBackgroundLike Boolean       @default(false)
+  momentsPrivacy        String        @default("all")
+  tickleText            String?
+  wechat                String        @unique
+  coin                  Int           @default(0)
+  isStarred             Boolean       @default(false)
+  gender                String?
+  hideGender            Boolean       @default(false)
+  phone                 String[]
+  tags                  String[]
+  description           String?
+  area                  String?
+  signature             String?
+  privacy               String        @default("all")
+  thumbnailInfo         String[]
+  hideThumbnail         Boolean       @default(false)
+  createdByFaker        Boolean       @default(false)
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+  assets                Asset[]
+  friendDialogues       Dialogue[]    @relation("FriendDialogues")
+  dialogues             Dialogue[]    @relation("ProfileDialogues")
+  feedComments          FeedComment[]
+  feeds                 Feed[]
+  transactions          Transaction[]
+  wallet                Wallet?
+  likedFeeds            Feed[]        @relation("FeedLikes")
 
   @@map("profiles")
 }
 
-// 钱包表
 model Wallet {
   id            String   @id
   profileId     String   @unique
@@ -60,102 +53,88 @@ model Wallet {
   miniFundYield Decimal  @default(0) @db.Decimal(5, 2)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-
   profile       Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   @@map("wallets")
 }
 
-// 对话列表表
 model Dialogue {
-  id                    String    @id
-  profileId             String
-  friendId              String
-  lastMessage           String?
-  lastMessageTime       DateTime?
-  isPinned              Boolean   @default(false)
-  isMuted               Boolean   @default(false)
-  badgeHide             Boolean   @default(false)
-  unreadMarkNumber      Int       @default(0)
-  unreadDisplayType     String    @default("number")
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
-
-  profile               Profile   @relation("ProfileDialogues", fields: [profileId], references: [id], onDelete: Cascade)
-  friend                Profile   @relation("FriendDialogues", fields: [friendId], references: [id], onDelete: Cascade)
-  conversations         Conversation[]
+  id                String    @id
+  profileId         String
+  friendId          String
+  lastMessage       String?
+  lastMessageTime   DateTime?
+  isPinned          Boolean   @default(false)
+  isMuted           Boolean   @default(false)
+  badgeHide         Boolean   @default(false)
+  unreadMarkNumber  Int       @default(0)
+  unreadDisplayType String    @default("number")
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  friend            Profile   @relation("FriendDialogues", fields: [friendId], references: [id], onDelete: Cascade)
+  profile           Profile   @relation("ProfileDialogues", fields: [profileId], references: [id], onDelete: Cascade)
 
   @@map("dialogues")
 }
 
-// 聊天记录表
 model Conversation {
-  id            String    @id
-  dialogueId    String
-  role          String    // 'mine' | 'friend'
-  type          String    // 消息类型
-  content       Json      // 存储各种消息内容
-  sendTimestamp BigInt?
-  upperText     String?
-  referenceId   String?
-  createdAt     DateTime  @default(now())
+  id          String
+  dialogueId  String
+  role        String
+  type        String
+  content     Json
+  upperText   String?
+  referenceId String?
+  createdAt   DateTime @default(now())
 
-  dialogue      Dialogue  @relation(fields: [dialogueId], references: [id], onDelete: Cascade)
-
+  @@unique([id, dialogueId], map: "conversations_unique")
   @@map("conversations")
 }
 
-// 朋友圈动态表
 model Feed {
-  id            String    @id
+  id            String        @id
   userId        String
-  content       Json      // 存储动态内容
+  content       Json
   sendTimestamp BigInt
   likeUserIds   String[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  user          Profile   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
   comments      FeedComment[]
-  likedBy       Profile[] @relation("FeedLikes")
+  user          Profile       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  likedBy       Profile[]     @relation("FeedLikes")
 
   @@map("feeds")
 }
 
-// 朋友圈评论表
 model FeedComment {
-  id            String    @id
+  id            String   @id
   feedId        String
   fromUserId    String
   replyUserId   String?
-  content       Json      // Slate.js 格式的富文本
+  content       Json
   sendTimestamp BigInt
-  createdAt     DateTime  @default(now())
-
-  feed          Feed      @relation(fields: [feedId], references: [id], onDelete: Cascade)
-  fromUser      Profile   @relation(fields: [fromUserId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  feed          Feed     @relation(fields: [feedId], references: [id], onDelete: Cascade)
+  fromUser      Profile  @relation(fields: [fromUserId], references: [id], onDelete: Cascade)
 
   @@map("feed_comments")
 }
 
-// 交易记录表
 model Transaction {
-  id            String    @id
+  id            String   @id
   profileId     String
-  type          String    // 交易类型
-  amount        Decimal   @db.Decimal(10, 2)
+  type          String
+  amount        Decimal  @db.Decimal(10, 2)
   timestamp     BigInt
   code          String?
   paymentMethod String?
-  data          Json?     // 存储各种交易类型的特定数据
-  createdAt     DateTime  @default(now())
-
-  profile       Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  data          Json?
+  createdAt     DateTime @default(now())
+  profile       Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   @@map("transactions")
 }
 
-// 资源文件表
 model Asset {
   id        String   @id
   profileId String
@@ -165,7 +144,6 @@ model Asset {
   filePath  String?
   url       String?
   createdAt DateTime @default(now())
-
   profile   Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   @@map("assets")

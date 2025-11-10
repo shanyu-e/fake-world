@@ -49,16 +49,19 @@ export const conversationsRoutes = new Elysia({ prefix: "/conversations" })
 	// 获取聊天记录
 	.get("/", async ({ query }) => {
 		try {
-			const dialogueId = query.dialogueId as string;
+			const id = (query.id as string) || undefined;
+			const dialogueId = (query.dialogueId as string) || undefined;
 			const page = Number.parseInt(query.page as string) || 1;
 			const limit = Number.parseInt(query.limit as string) || 50;
 			const skip = (page - 1) * limit;
 
 			const [conversations, total] = await Promise.all([
 				prisma.conversation.findMany({
-					where: { dialogueId },
+					where: {
+						AND: [{ id }, { dialogueId }],
+					},
 					orderBy: {
-						sendTimestamp: "desc",
+						dialogueId: "asc",
 					},
 					skip,
 					take: limit,
@@ -75,10 +78,10 @@ export const conversationsRoutes = new Elysia({ prefix: "/conversations" })
 	})
 
 	// 获取单个聊天记录
-	.get("/:id", async ({ params }) => {
+	.get("/:id", async ({ params, query }) => {
 		try {
 			const conversation = await prisma.conversation.findUnique({
-				where: { id: params.id },
+				where: { id_dialogueId: { id: params.id, dialogueId: query.dialogueId as string } },
 			});
 
 			if (!conversation) {
@@ -124,7 +127,6 @@ export const conversationsRoutes = new Elysia({ prefix: "/conversations" })
 				role: t.String(),
 				type: t.String(),
 				content: t.Any(),
-				sendTimestamp: t.Optional(t.Number()),
 				upperText: t.Optional(t.String()),
 				referenceId: t.Optional(t.String()),
 			}),
@@ -143,13 +145,22 @@ export const conversationsRoutes = new Elysia({ prefix: "/conversations" })
 						continue;
 					}
 					for (const item of body[key]) {
-						const conversation = await prisma.conversation.update({
-							where: { id: item.id, dialogueId: item.dialogueId },
-							data: {
+						const conversation = await prisma.conversation.upsert({
+							//  upsert 操作，根据 id 和 dialogueId li 唯一确定一条记录
+							where: { id_dialogueId: { id: item.id, dialogueId: item.dialogueId } },
+							update: {
 								role: item.role,
 								type: item.type,
 								upperText: item.upperText,
-								sendTimestamp: item.sendTimestamp,
+								content: item.textContent,
+								referenceId: item.referenceId,
+							},
+							create: {
+								id: item.id,
+								dialogueId: item.dialogueId,
+								role: item.role,
+								type: item.type,
+								upperText: item.upperText,
 								content: item.textContent,
 								referenceId: item.referenceId,
 							},
@@ -173,7 +184,6 @@ export const conversationsRoutes = new Elysia({ prefix: "/conversations" })
 						type: t.String(),
 						role: t.String(),
 						upperText: t.Optional(t.String()),
-						sendTimestamp: t.Optional(t.Number()),
 						// 根据 TConversationItem 类型添加其他可能的字段
 						textContent: t.Optional(t.Any()),
 						referenceId: t.Optional(t.String()),
@@ -184,10 +194,10 @@ export const conversationsRoutes = new Elysia({ prefix: "/conversations" })
 	)
 
 	// 删除消息
-	.delete("/:id", async ({ params }) => {
+	.delete("/:id", async ({ params, query }) => {
 		try {
 			await prisma.conversation.delete({
-				where: { id: params.id },
+				where: { id_dialogueId: { id: params.id, dialogueId: query.dialogueId as string } },
 			});
 
 			return createResponse(null, "Message deleted successfully");
