@@ -82,7 +82,7 @@ model Conversation {
   dialogueId  String
   role        String
   type        String
-  content     Json
+  content     Json?
   upperText   String?
   referenceId String?
   createdAt   DateTime @default(now())
