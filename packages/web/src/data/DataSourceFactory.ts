@@ -83,6 +83,9 @@ export const dataSources = {
   // 聊天记录
   conversations: (get: Getter) => createDataSource<any>("allConversations", "/conversations", get(dataSourceConfigAtom)),
 
+  // 聊天记录2
+  conversationItems: (get: Getter) => createDataSource<any>("conversationItems", "/conversation_items", get(dataSourceConfigAtom)),
+
   // 朋友圈
   feeds: (get: Getter) => createDataSource<any>("feeds", "/feeds", get(dataSourceConfigAtom)),
 

@@ -8,6 +8,7 @@ import { Elysia, t } from "elysia";
 import { rateLimit } from "elysia-rate-limit";
 import { z } from "zod";
 import { openai } from "./provider";
+import { conversationItemsRoutes } from "./routes/conversation_items";
 import { conversationsRoutes } from "./routes/conversations";
 import { dialoguesRoutes } from "./routes/dialogues";
 import { profilesRoutes } from "./routes/profiles";
@@ -65,6 +66,7 @@ const app = new Elysia({
 			.use(walletRoutes)
 			.use(dialoguesRoutes)
 			.use(conversationsRoutes)
+			.use(conversationItemsRoutes)
 			.onError(async (err) => {
 				return {
 					code: -1,

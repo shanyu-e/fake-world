@@ -148,3 +148,36 @@ model Asset {
 
   @@map("assets")
 }
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model conversation_items {
+  id                         String   @db.VarChar(64)
+  dialogue_id                String   @db.VarChar(64)
+  type                       String   @db.VarChar(32)
+  role                       String   @db.VarChar(16)
+  send_timestamp             BigInt?
+  upper_text                 String?
+  text_content               Json?
+  reference_id               String?  @db.VarChar(64)
+  simple_content             String?
+  extra_class_name           String?
+  original_sender            String?  @db.VarChar(16)
+  transfer_status            String?  @db.VarChar(16)
+  transfer_amount            Decimal? @db.Decimal(18, 2)
+  transfer_note              String?
+  red_packet_original_sender String?  @db.VarChar(16)
+  red_packet_status          String?  @db.VarChar(16)
+  red_packet_amount          Decimal? @db.Decimal(18, 2)
+  red_packet_note            String?
+  red_packet_id              String?  @db.VarChar(64)
+  image_info                 String?
+  video_info                 String?
+  voice_duration             Int?
+  voice_is_read              Boolean?
+  voice_show_stt             Boolean?
+  voice_stt                  String?
+  personal_card_avatar_info  String?
+  personal_card_nickname     String?
+
+  @@unique([id, dialogue_id], map: "conversation_items_1_unique")
+}
