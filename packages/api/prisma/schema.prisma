@@ -155,7 +155,7 @@ model conversation_items {
   dialogue_id                String   @db.VarChar(64)
   type                       String   @db.VarChar(32)
   role                       String   @db.VarChar(16)
-  send_timestamp             BigInt?
+  send_timestamp             Int?
   upper_text                 String?
   text_content               Json?
   reference_id               String?  @db.VarChar(64)

@@ -20,7 +20,7 @@ export type TAllConversationLists = Record<IStateProfile["id"], TStateConversati
 export const allConversationListAtomConfig = createDataSourceAtom<TAllConversationLists>(
   "allConversations",
   { "b0cfb3c9-5b66-46be-abfe-dc67f79e497a": MOCK_INIT_CONVERSATION_LIST } as TAllConversationLists,
-  (get) => dataSources.conversations(get),
+  (get) => dataSources.conversationItems(get),
   {
     syncOnMount: true,
     syncInterval: 30000, // 30秒同步一次
@@ -69,11 +69,12 @@ export const setConversationListValue = (id: IStateProfile["id"], params: SetSta
 export const loadAllConversations = async () => {
   // 自定义加载：拉取远程数据，转换为内部结构并按 dialogueId 分组
   const getConfig = () => mainStore.get(dataSourceConfigAtom);
-  const ds = dataSources.conversations(getConfig);
+  const ds = dataSources.conversationItems(getConfig);
   const rawList = await ds.getAll();
 
   // 兼容远程返回的单条会话结构，转换为内部 TConversationItem 并按 dialogueId 分组
   const grouped: TAllConversationLists = {} as TAllConversationLists;
+
   (rawList as any[]).forEach((raw) => {
     const id = raw.id as string;
     if (!grouped[id]) grouped[id] = [];
@@ -88,8 +89,9 @@ export const loadAllConversations = async () => {
     } as any;
 
     // 类型映射（目前主要兼容 text）
+    // 注意：由于 RemoteDataSource 已经将 API 响应转换为驼峰格式，这里直接使用驼峰字段名
     if (raw.type === "text") {
-      const textContent = Array.isArray(raw.content) ? (raw.content as Descendant[]) : ([raw.content] as Descendant[]);
+      const textContent = Array.isArray(raw.textContent) ? (raw.textContent as Descendant[]) : ([raw.textContent] as Descendant[]);
       grouped[id].push({
         ...base,
         type: EConversationType.text,
@@ -114,9 +116,10 @@ export const loadAllConversations = async () => {
         nickname: raw.nickname,
       } as any);
     }
+    mainStore.set(conversationListAtom(id), grouped[id]);
   });
 
-  mainStore.set(allConversationListAtom, grouped);
+  // mainStore.set(allConversationListAtom, grouped);
 };
 
 export const conversationItemReferenceAtom = atomFamily(

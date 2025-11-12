@@ -69,7 +69,7 @@ export const conversationItemsRoutes = new Elysia({ prefix: "/conversation_items
 				prisma.conversation_items.findMany({
 					where: whereCondition,
 					orderBy: {
-						send_timestamp: "desc",
+						dialogue_id: "asc",
 					},
 					skip,
 					take: limit,
@@ -78,7 +78,6 @@ export const conversationItemsRoutes = new Elysia({ prefix: "/conversation_items
 					where: whereCondition,
 				}),
 			]);
-
 			return createPaginatedResponse(conversationItems, page, limit, total);
 		} catch (error) {
 			console.error("Failed to fetch conversation items:", error);
@@ -132,7 +131,7 @@ export const conversationItemsRoutes = new Elysia({ prefix: "/conversation_items
 				dialogue_id: t.String(),
 				type: t.String(),
 				role: t.String(),
-				send_timestamp: t.Optional(t.BigInt()),
+				send_timestamp: t.Optional(t.Number()),
 				upper_text: t.Optional(t.String()),
 				text_content: t.Optional(t.Any()),
 				reference_id: t.Optional(t.String()),
@@ -163,58 +162,108 @@ export const conversationItemsRoutes = new Elysia({ prefix: "/conversation_items
 	.put(
 		"/:id",
 		async ({ params, body, query }) => {
-			try {
-				const dialogueId = query.dialogue_id as string;
+			const updatedConversations = [];
 
-				if (!dialogueId) {
-					return createResponse(null, "dialogue_id is required", -1);
-				}
-
-				const updatedConversationItem = await prisma.conversation_items.update({
-					where: {
-						id_dialogue_id: {
-							id: params.id,
-							dialogue_id: dialogueId,
+			for (const key in body) {
+				for (const item of body[key]) {
+					const conversation = await prisma.conversation_items.upsert({
+						where: { id_dialogue_id: { id: item.id, dialogue_id: item.dialogue_id } },
+						update: {
+							type: item.type,
+							role: item.role,
+							send_timestamp: item.send_timestamp,
+							upper_text: item.upper_text,
+							text_content: item.text_content,
+							reference_id: item.reference_id,
+							simple_content: item.simple_content,
+							extra_class_name: item.extra_class_name,
+							original_sender: item.original_sender,
+							transfer_status: item.transfer_status,
+							transfer_amount: item.transfer_amount,
+							transfer_note: item.transfer_note,
+							red_packet_original_sender: item.red_packet_original_sender,
+							red_packet_status: item.red_packet_status,
+							red_packet_amount: item.red_packet_amount,
+							red_packet_note: item.red_packet_note,
+							red_packet_id: item.red_packet_id,
+							image_info: item.image_info,
+							video_info: item.video_info,
+							voice_duration: item.voice_duration,
+							voice_is_read: item.voice_is_read,
+							voice_show_stt: item.voice_show_stt,
+							voice_stt: item.voice_stt,
+							personal_card_avatar_info: item.personal_card_avatar_info,
+							personal_card_nickname: item.personal_card_nickname,
 						},
-					},
-					data: body,
-				});
-
-				return createResponse(updatedConversationItem, "Conversation item updated successfully");
-			} catch (error) {
-				console.error("Failed to update conversation item:", error);
-				return createResponse(null, "Failed to update conversation item", -1);
+						create: {
+							id: item.id,
+							dialogue_id: item.dialogue_id,
+							type: item.type,
+							role: item.role,
+							send_timestamp: item.send_timestamp,
+							upper_text: item.upper_text,
+							text_content: item.text_content,
+							reference_id: item.reference_id,
+							simple_content: item.simple_content,
+							extra_class_name: item.extra_class_name,
+							original_sender: item.original_sender,
+							transfer_status: item.transfer_status,
+							transfer_amount: item.transfer_amount,
+							transfer_note: item.transfer_note,
+							red_packet_original_sender: item.red_packet_original_sender,
+							red_packet_status: item.red_packet_status,
+							red_packet_amount: item.red_packet_amount,
+							red_packet_note: item.red_packet_note,
+							red_packet_id: item.red_packet_id,
+							image_info: item.image_info,
+							video_info: item.video_info,
+							voice_duration: item.voice_duration,
+							voice_is_read: item.voice_is_read,
+							voice_show_stt: item.voice_show_stt,
+							voice_stt: item.voice_stt,
+							personal_card_avatar_info: item.personal_card_avatar_info,
+							personal_card_nickname: item.personal_card_nickname,
+						},
+					});
+					updatedConversations.push(conversation);
+				}
 			}
+			return createResponse(updatedConversations, "Conversation items updated successfully");
 		},
 		{
-			body: t.Partial(
-				t.Object({
-					type: t.String(),
-					role: t.String(),
-					send_timestamp: t.Optional(t.BigInt()),
-					upper_text: t.Optional(t.String()),
-					text_content: t.Optional(t.Any()),
-					reference_id: t.Optional(t.String()),
-					simple_content: t.Optional(t.String()),
-					extra_class_name: t.Optional(t.String()),
-					original_sender: t.Optional(t.String()),
-					transfer_status: t.Optional(t.String()),
-					transfer_amount: t.Optional(t.String()),
-					transfer_note: t.Optional(t.String()),
-					red_packet_original_sender: t.Optional(t.String()),
-					red_packet_status: t.Optional(t.String()),
-					red_packet_amount: t.Optional(t.String()),
-					red_packet_note: t.Optional(t.String()),
-					red_packet_id: t.Optional(t.String()),
-					image_info: t.Optional(t.String()),
-					video_info: t.Optional(t.String()),
-					voice_duration: t.Optional(t.Number()),
-					voice_is_read: t.Optional(t.Boolean()),
-					voice_show_stt: t.Optional(t.Boolean()),
-					voice_stt: t.Optional(t.String()),
-					personal_card_avatar_info: t.Optional(t.String()),
-					personal_card_nickname: t.Optional(t.String()),
-				}),
+			body: t.Record(
+				t.String(),
+				t.Array(
+					t.Object({
+						id: t.String(),
+						dialogue_id: t.String(),
+						type: t.String(),
+						role: t.String(),
+						send_timestamp: t.Optional(t.Number()),
+						upper_text: t.Optional(t.String()),
+						text_content: t.Optional(t.Any()),
+						reference_id: t.Optional(t.String()),
+						simple_content: t.Optional(t.String()),
+						extra_class_name: t.Optional(t.String()),
+						original_sender: t.Optional(t.String()),
+						transfer_status: t.Optional(t.String()),
+						transfer_amount: t.Optional(t.String()),
+						transfer_note: t.Optional(t.String()),
+						red_packet_original_sender: t.Optional(t.String()),
+						red_packet_status: t.Optional(t.String()),
+						red_packet_amount: t.Optional(t.String()),
+						red_packet_note: t.Optional(t.String()),
+						red_packet_id: t.Optional(t.String()),
+						image_info: t.Optional(t.String()),
+						video_info: t.Optional(t.String()),
+						voice_duration: t.Optional(t.Number()),
+						voice_is_read: t.Optional(t.Boolean()),
+						voice_show_stt: t.Optional(t.Boolean()),
+						voice_stt: t.Optional(t.String()),
+						personal_card_avatar_info: t.Optional(t.String()),
+						personal_card_nickname: t.Optional(t.String()),
+					}),
+				),
 			),
 		},
 	)
