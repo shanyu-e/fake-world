@@ -30,5 +30,8 @@
 		"quickfix.biome": "explicit",
 		"source.organizeImports.biome": "explicit"
 	},
-	"editor.formatOnSave": true
+	"editor.formatOnSave": true,
+	"[prisma]": {
+		"editor.defaultFormatter": "Prisma.prisma"
+	}
 }
