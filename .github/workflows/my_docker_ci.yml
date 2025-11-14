@@ -28,6 +28,7 @@ jobs:
       
       # 步骤3：登录 Docker Hub（使用 Secrets 中的凭证，避免硬编码）
       - name: 登录 Docker Hub
+        id: docker_login
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
