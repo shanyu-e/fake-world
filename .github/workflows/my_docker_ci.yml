@@ -74,3 +74,4 @@ jobs:
           echo "镜像标签列表："
           echo ${{ steps.meta.outputs.tags }}
           echo "✅ 镜像已成功推送到 Docker Hub：https://hub.docker.com/r/${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO }}"
+          
