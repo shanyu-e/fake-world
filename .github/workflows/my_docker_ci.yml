@@ -36,12 +36,41 @@ jobs:
         env:
           DEBUG_MODE: true  # 启用调试模式
 
-      # 步骤4：显示登录状态
+      # 步骤3-1：显示登录状态
       - name: 检查登录状态
-        if: always()  # 强制执行
         run: |
           echo "登录步骤状态码: ${{ steps.docker_login.outcome }}"
           echo "Docker Hub 用户名: ${{ secrets.DOCKER_HUB_USERNAME }}"
-          echo "登录详细信息: ${{ steps.docker_login.outputs }}"
+          echo "登录详细信息: ${{ toJSON(steps.docker_login.outputs) }}"
           echo "GitHub Runner IP: $(curl -s ifconfig.me)"
           echo "当前时间戳: $(date +%s)"
+
+      # 步骤4：生成镜像标签（latest + 日期标签，方便版本追溯）
+      - name: 生成镜像标签
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO }}  # 镜像完整路径（用户名/仓库名）
+          tags: |
+            latest
+            ${{ github.sha }}
+            ${{ github.run_number }}
+            type=raw,value={{date 'YYYYMMDD'}}
+
+      # 步骤5：构建 Docker 镜像并推送到 Docker Hub
+      - name: 构建并推送镜像
+        uses: docker/build-push-action@v5
+        with:
+          context: .  # 构建上下文（仓库根目录，即 Dockerfile 所在目录）
+          file: ./Dockerfile  # Dockerfile 路径（根目录直接写 ./Dockerfile）
+          push: true  # 启用「推送镜像」（false 仅构建不推送，测试时可改为 false）
+          tags: ${{ steps.meta.outputs.tags }}  # 引用步骤4生成的所有标签
+          cache-from: type=gha  # 启用 GitHub Actions 缓存（加速下次构建）
+          cache-to: type=gha,mode=max  # 缓存最大化（包含所有构建层）
+
+      # 步骤6：验证推送结果（可选，方便排查问题）
+      - name: 验证镜像推送成功
+        run: |
+          echo "镜像标签列表："
+          echo ${{ steps.meta.outputs.tags }}
+          echo "✅ 镜像已成功推送到 Docker Hub：https://hub.docker.com/r/${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO }}"
