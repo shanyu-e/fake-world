@@ -42,6 +42,6 @@ jobs:
         run: |
           echo "登录步骤状态码: ${{ steps.docker_login.outcome }}"
           echo "Docker Hub 用户名: ${{ secrets.DOCKER_HUB_USERNAME }}"
-          echo "登录详细信息: ${{ steps.docker_login.outputs | to_json }}"
+          echo "登录详细信息: ${{ steps.docker_login.outputs }}"
           echo "GitHub Runner IP: $(curl -s ifconfig.me)"
           echo "当前时间戳: $(date +%s)"
