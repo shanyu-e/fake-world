@@ -17,17 +17,11 @@ ADD . /code
 RUN pnpm run build:web
 
 
-FROM nginx:alpine
-RUN apk add --no-cache curl libc6-compat
-# 安装 bun（官方脚本，加入系统 PATH）
-RUN curl -fsSL https://bun.sh/install | sh && \
-    ln -s /root/.bun/bin/bun /usr/local/bin/bun && \
-    ln -s /root/.bun/bin/bunx /usr/local/bin/bunx
-
+FROM oven/bun:alpine
+RUN apk add --no-cache nginx
 # 验证 bun 和 nginx 安装成功
 RUN bun --version && nginx -v
 
-# 【关键】复制你的 Nginx 配置文件（根据实际路径调整，如无需自定义可删除此步）
 # 示例：复制仓库中 packages/web/nginx.conf 到 Nginx 配置目录（与你最初的 Dockerfile 一致）
 COPY ./packages/web/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=app-builder code/packages/web/dist /usr/share/nginx/html
