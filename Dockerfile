@@ -20,7 +20,7 @@ RUN pnpm run build:web
 FROM nginx:alpine
 RUN apk add --no-cache curl libc6-compat
 # 安装 bun（官方脚本，加入系统 PATH）
-RUN curl -fsSL https://bun.sh/install | bash && \
+RUN curl -fsSL https://bun.sh/install | sh && \
     ln -s /root/.bun/bin/bun /usr/local/bin/bun && \
     ln -s /root/.bun/bin/bunx /usr/local/bin/bunx
 
