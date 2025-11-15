@@ -35,7 +35,7 @@ const handlerMap: HandlerMap = {
 	[EMetaDataType.UnreadCount]: (get) => get(unreadCountAtom),
 	[EMetaDataType.ConversationItem]: (get, index) =>
 		index && index.length === 2
-			? get(conversationListAtom(index[0])).find((v) => v.id === index[1])
+			? get(conversationListAtom(index[0]))?.find((v) => v.id === index[1])
 			: undefined,
 	[EMetaDataType.ConversationInput]: (get) => get(inputterConfigAtom),
 	[EMetaDataType.StatusBar]: (get) => get(statusBarConfigAtom),

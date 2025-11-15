@@ -18,7 +18,7 @@ type Props = {
 const RedPacketAcceptedReply = ({ redPacketId, upperText, id }: Props) => {
 	const { conversationId } = useConversationAPI();
 	const [conversationList, setConversationList] = useAtom(conversationListAtom(conversationId));
-	const redPacket = conversationList.find((v) => v.id === redPacketId);
+	const redPacket = conversationList?.find((v) => v.id === redPacketId);
 
 	if (!redPacket) {
 		setConversationList((prev) => prev.filter((v) => v.id !== id));
