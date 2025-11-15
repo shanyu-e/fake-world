@@ -10,6 +10,7 @@ RUN cd packages/api && npx prisma generate
 
 FROM node:lts AS app-builder
 ENV PROJECT_ENV=production
+ENV DATABASE_URL=${DATABASE_URL}
 WORKDIR /code
 ADD package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc /code/
 ADD packages/web/package.json /code/packages/web/

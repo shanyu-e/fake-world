@@ -67,6 +67,8 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}  # 引用步骤4生成的所有标签
           cache-from: type=gha  # 启用 GitHub Actions 缓存（加速下次构建）
           cache-to: type=gha,mode=max  # 缓存最大化（包含所有构建层）
+          build-args: |
+            DATABASE_URL=${{ secrets.DATABASE_URL }}
 
       # 步骤6：验证推送结果（可选，方便排查问题）
       - name: 验证镜像推送成功
