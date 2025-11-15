@@ -3,8 +3,9 @@ ENV NODE_ENV=production
 WORKDIR /app
 ADD package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc /app/
 ADD packages/api/package.json /app/packages/api/
-RUN corepack enable && cd packages/api && pnpm install --prod --no-optional && npx prisma generate
+RUN corepack enable && cd packages/api && pnpm install --prod --no-optional
 ADD . /app
+RUN cd packages/api && npx prisma generate
 
 
 FROM node:lts AS app-builder
