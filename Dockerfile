@@ -3,7 +3,7 @@ ENV NODE_ENV=production
 WORKDIR /app
 ADD package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc /app/
 ADD packages/api/package.json /app/packages/api/
-RUN corepack enable && cd packages/api && pnpm install --prod --no-optional
+RUN corepack enable && cd packages/api && pnpm install --prod --no-optional && npx prisma generate
 ADD . /app
 
 
@@ -33,5 +33,6 @@ COPY start.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/start.sh
 
 # 前台运行启动脚本（容器不退出）
-CMD ["start.sh"]
+CMD ["tail -f /dev/null"]
+# CMD ["start.sh"]
 EXPOSE 80
