@@ -2,7 +2,7 @@ import { config } from "dotenv";
 import { PrismaClient } from "../generated/prisma/client";
 
 // 加载环境变量
-config({ path: ".env.local" });
+config();
 
 export const prisma = new PrismaClient({
 	log: ["query", "info", "warn", "error"],
