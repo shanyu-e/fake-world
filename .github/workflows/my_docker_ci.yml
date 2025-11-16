@@ -44,6 +44,7 @@ jobs:
           echo "登录详细信息: ${{ toJSON(steps.docker_login.outputs) }}"
           echo "GitHub Runner IP: $(curl -s ifconfig.me)"
           echo "当前时间戳: $(date +%s)"
+          echo "DATABASE_URL is ${{ secrets.DATABASE_URL }}"
 
       # 步骤4：生成镜像标签（latest + 日期标签，方便版本追溯）
       - name: 生成镜像标签
@@ -76,5 +77,4 @@ jobs:
           echo "镜像标签列表："
           echo "${{ steps.meta.outputs.tags }}"
           echo "✅ 镜像已成功推送到 Docker Hub：https://hub.docker.com/r/${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO }}"
-          echo "DATABASE_URL is ${{ secrets.DATABASE_URL }}"
           
