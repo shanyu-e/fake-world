@@ -2,13 +2,12 @@ ARG DATABASE_URL
 
 FROM node:lts AS api-builder
 ENV NODE_ENV=production
-ENV DATABASE_URL=${DATABASE_URL}
 WORKDIR /app
 ADD package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc /app/
 ADD packages/api/package.json /app/packages/api/
 RUN corepack enable && cd packages/api && pnpm install --prod --no-optional
 ADD . /app
-RUN cd packages/api && npx prisma generate
+RUN cd packages/api && DATABASE_URL=$DATABASE_URL npx prisma generate
 
 
 FROM node:lts AS app-builder
