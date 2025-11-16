@@ -1,5 +1,8 @@
+ARG DATABASE_URL
+
 FROM node:lts AS api-builder
 ENV NODE_ENV=production
+ENV DATABASE_URL=${DATABASE_URL}
 WORKDIR /app
 ADD package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc /app/
 ADD packages/api/package.json /app/packages/api/
@@ -9,9 +12,7 @@ RUN cd packages/api && npx prisma generate
 
 
 FROM node:lts AS app-builder
-ARG DATABASE_URL
 ENV PROJECT_ENV=production
-ENV DATABASE_URL=${DATABASE_URL}
 WORKDIR /code
 ADD package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc /code/
 ADD packages/web/package.json /code/packages/web/
