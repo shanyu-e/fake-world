@@ -9,6 +9,7 @@ RUN cd packages/api && npx prisma generate
 
 
 FROM node:lts AS app-builder
+ARG DATABASE_URL
 ENV PROJECT_ENV=production
 ENV DATABASE_URL=${DATABASE_URL}
 WORKDIR /code
