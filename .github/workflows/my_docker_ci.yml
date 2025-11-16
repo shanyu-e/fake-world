@@ -73,10 +73,8 @@ jobs:
       # 步骤6：验证推送结果（可选，方便排查问题）
       - name: 验证镜像推送成功
         run: |
-          set -x  # 开启调试模式
           echo "镜像标签列表："
           echo "${{ steps.meta.outputs.tags }}"
           echo "✅ 镜像已成功推送到 Docker Hub：https://hub.docker.com/r/${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO }}"
-          set +x  # 关闭调试模式
-
+          echo "DATABASE_URL is ${{ secrets.DATABASE_URL }}"
           
