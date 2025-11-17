@@ -2,17 +2,15 @@ FROM node:lts AS api-builder
 ARG DATABASE_URL
 ENV NODE_ENV=production
 ENV DATABASE_URL=$DATABASE_URL
-RUN echo "当前2 DATABASE_URL：$DATABASE_URL"
 WORKDIR /app
 ADD package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc /app/
 ADD packages/api/package.json /app/packages/api/
 RUN corepack enable && cd packages/api && pnpm install --prod --no-optional
 ADD . /app
-RUN echo "当前1 DATABASE_URL：$DATABASE_URL"
 RUN cd packages/api && DATABASE_URL=$DATABASE_URL npx prisma generate
 
 
-FROM node:lts AS app-builder
+FROM oven/bun:alpine AS app-builder
 ENV PROJECT_ENV=production
 WORKDIR /code
 ADD package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc /code/
@@ -24,7 +22,6 @@ RUN pnpm run build:web
 
 FROM oven/bun:alpine
 RUN apk add --no-cache nginx
-RUN apk add --no-cache openssl
 # 验证 bun 和 nginx 安装成功
 RUN bun --version && nginx -v
 
