@@ -10,7 +10,7 @@ ADD . /app
 RUN cd packages/api && DATABASE_URL=$DATABASE_URL npx prisma generate
 
 
-FROM oven/bun:alpine AS app-builder
+FROM node:lts AS app-builder
 ENV PROJECT_ENV=production
 WORKDIR /code
 ADD package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc /code/
@@ -20,9 +20,22 @@ ADD . /code
 RUN pnpm run build:web
 
 
-FROM oven/bun:alpine
-RUN apk add --no-cache nginx
-# 验证 bun 和 nginx 安装成功
+FROM node:lts
+RUN apt update && \
+    apt install -y --no-install-recommends \
+      curl \
+      nginx \
+      supervisor && \
+    # 清理 apt 缓存，减小镜像体积
+    apt clean && \
+    rm -rf /var/lib/apt/lists/*
+# 安装 Bun
+RUN curl -fsSL https://bun.sh/install | bash && \
+    # 把 Bun 路径加入全局环境变量（让 `bun` 命令全局可用）
+    ln -s /root/.bun/bin/bun /usr/local/bin/bun && \
+    # 验证 Bun 安装成功（输出版本号，失败则构建中断）
+    bun --version
+
 RUN bun --version && nginx -v
 
 # 示例：复制仓库中 packages/web/nginx.conf 到 Nginx 配置目录（与你最初的 Dockerfile 一致）
