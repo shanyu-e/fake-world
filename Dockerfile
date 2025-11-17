@@ -24,11 +24,12 @@ RUN pnpm run build:web
 
 FROM oven/bun:alpine
 RUN apk add --no-cache nginx
+RUN apk add --no-cache openssl
 # 验证 bun 和 nginx 安装成功
 RUN bun --version && nginx -v
 
 # 示例：复制仓库中 packages/web/nginx.conf 到 Nginx 配置目录（与你最初的 Dockerfile 一致）
-COPY ./packages/web/nginx.conf /etc/nginx/conf.d/default.conf
+COPY ./packages/web/nginx.conf /etc/nginx/http.d/default.conf
 COPY --from=app-builder code/packages/web/dist /usr/share/nginx/html
 
 COPY --from=api-builder /app /app
