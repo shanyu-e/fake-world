@@ -38,6 +38,6 @@ COPY start.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/start.sh
 
 # 前台运行启动脚本（容器不退出）
-CMD ["tail -f /dev/null"]
+CMD ["tail", "-f", "/dev/null"]
 # CMD ["start.sh"]
 EXPOSE 80
