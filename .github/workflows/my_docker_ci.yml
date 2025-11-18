@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     outputs:
-      fixed_tag: ${{ steps.meta.outputs.tags_list[2] }}
+      fixed_tag: ${{ github.run_number }}
     steps:
       # 步骤1：拉取仓库代码到运行环境
       - name: 拉取代码
