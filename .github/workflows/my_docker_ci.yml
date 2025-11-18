@@ -100,14 +100,10 @@ jobs:
           FIXED_TAG="${{ needs.build_and_deploy_job.outputs.fixed_tag }}"
 
           # 通过 SSH 执行部署命令（一行一个命令，用 && 连接）
-          ssh -T -o StrictHostKeyChecking=no -p 10022 $SERVER_USER@$SERVER_IP << EOF
-            # 1. 拉取最新镜像（使用固定标签，避免缓存问题）
+          ssh -T -o StrictHostKeyChecking=no -p 10022 $SERVER_USER@$SERVER_IP "
             docker pull $IMAGE_NAME:$FIXED_TAG && \
-            # 2. 进入 docker-compose 目录
             cd $(dirname $DOCKER_COMPOSE_PATH) && \
-            # 3. 重启服务（--build 强制使用新镜像，--remove-orphans 删除无用容器）
             docker-compose up -d --build && \
-            # 4. 验证服务状态（可选，输出日志方便排查）
             docker-compose ps && \
-            echo "✅ 部署成功！当前使用镜像：$IMAGE_NAME:$FIXED_TAG"
-          EOF
+            echo '✅ 部署成功！当前使用镜像：$IMAGE_NAME:$FIXED_TAG'
+          "
