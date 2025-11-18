@@ -39,7 +39,7 @@ RUN curl -fsSL https://bun.sh/install | bash && \
 RUN bun --version && nginx -v
 
 # 示例：复制仓库中 packages/web/nginx.conf 到 Nginx 配置目录（与你最初的 Dockerfile 一致）
-COPY ./packages/web/nginx.conf /etc/nginx/http.d/default.conf
+COPY ./packages/web/nginx.conf /etc/nginx/sites-enabled/default
 COPY --from=app-builder code/packages/web/dist /usr/share/nginx/html
 
 COPY --from=api-builder /app /app
@@ -49,6 +49,7 @@ COPY start.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/start.sh
 
 # 前台运行启动脚本（容器不退出）
-CMD ["tail", "-f", "/dev/null"]
-# CMD ["start.sh"]
+# CMD ["tail", "-f", "/dev/null"]
+CMD ["start.sh"]
 EXPOSE 80
+EXPOSE 9000
