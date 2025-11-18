@@ -66,8 +66,8 @@ jobs:
           file: ./Dockerfile  # Dockerfile 路径（根目录直接写 ./Dockerfile）
           push: true  # 启用「推送镜像」（false 仅构建不推送，测试时可改为 false）
           tags: ${{ steps.meta.outputs.tags }}  # 引用步骤4生成的所有标签
-          # cache-from: type=gha  # 启用 GitHub Actions 缓存（加速下次构建）
-          # cache-to: type=gha,mode=max  # 缓存最大化（包含所有构建层）
+          cache-from: type=gha  # 启用 GitHub Actions 缓存（加速下次构建）
+          cache-to: type=gha,mode=max  # 缓存最大化（包含所有构建层）
           build-args: |
             DATABASE_URL=${{ secrets.DATABASE_URL }}
 
