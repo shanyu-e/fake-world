@@ -14,6 +14,8 @@ jobs:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
     name: Build and Deploy Job
+    outputs:
+      fixed_tag: ${{ steps.meta.outputs.tags_list[2] }}
     steps:
       # 步骤1：拉取仓库代码到运行环境
       - name: 拉取代码
@@ -79,3 +81,33 @@ jobs:
           echo "${{ steps.meta.outputs.tags }}"
           echo "✅ 镜像已成功推送到 Docker Hub：https://hub.docker.com/r/${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO }}"
           
+  # 新增：部署到正式环境（依赖 build-and-push 成功）
+  deploy-to-production:
+    needs: build-and-push  # 只有构建推送成功才执行部署
+    runs-on: ubuntu-latest
+    steps:
+      - name: 配置 SSH（连接目标服务器）
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}  # 目标服务器的 SSH 私钥（存 Secrets）
+
+      - name: 连接服务器，拉取镜像并重启 Docker Compose
+        run: |
+          SERVER_USER="root"
+          SERVER_IP="${{ secrets.PROD_SERVER_IP }}"
+          DOCKER_COMPOSE_PATH="/opt/1panel/docker/compose/dj-fake-world/docker-compose.yml"
+          IMAGE_NAME="docker.1ms.run/${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO }}"
+          FIXED_TAG="${{ needs.build-and-push.outputs.fixed_tag }}"
+
+          # 通过 SSH 执行部署命令（一行一个命令，用 && 连接）
+          ssh -o StrictHostKeyChecking=no -p 10022 $SERVER_USER@$SERVER_IP << 'EOF'
+            # 1. 拉取最新镜像（使用固定标签，避免缓存问题）
+            docker pull $IMAGE_NAME:$FIXED_TAG && \
+            # 2. 进入 docker-compose 目录
+            cd $(dirname $DOCKER_COMPOSE_PATH) && \
+            # 3. 重启服务（--build 强制使用新镜像，--remove-orphans 删除无用容器）
+            docker-compose up -d --build && \
+            # 4. 验证服务状态（可选，输出日志方便排查）
+            docker-compose ps && \
+            echo "✅ 部署成功！当前使用镜像：$IMAGE_NAME:$FIXED_TAG"
+          EOF
