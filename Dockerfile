@@ -21,6 +21,7 @@ RUN pnpm run build:web
 
 
 FROM node:lts
+ENV DATABASE_URL=$DATABASE_URL
 RUN apt update && \
     apt install -y --no-install-recommends \
       curl \
