@@ -81,9 +81,9 @@ jobs:
           echo "${{ steps.meta.outputs.tags }}"
           echo "✅ 镜像已成功推送到 Docker Hub：https://hub.docker.com/r/${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO }}"
           
-  # 新增：部署到正式环境（依赖 build-and-push 成功）
+  # 新增：部署到正式环境（依赖 build_and_deploy_job 成功）
   deploy-to-production:
-    needs: build-and-push  # 只有构建推送成功才执行部署
+    needs: build_and_deploy_job  # 只有构建推送成功才执行部署
     runs-on: ubuntu-latest
     steps:
       - name: 配置 SSH（连接目标服务器）
@@ -97,7 +97,7 @@ jobs:
           SERVER_IP="${{ secrets.PROD_SERVER_IP }}"
           DOCKER_COMPOSE_PATH="/opt/1panel/docker/compose/dj-fake-world/docker-compose.yml"
           IMAGE_NAME="docker.1ms.run/${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO }}"
-          FIXED_TAG="${{ needs.build-and-push.outputs.fixed_tag }}"
+          FIXED_TAG="${{ needs.build_and_deploy_job.outputs.fixed_tag }}"
 
           # 通过 SSH 执行部署命令（一行一个命令，用 && 连接）
           ssh -o StrictHostKeyChecking=no -p 10022 $SERVER_USER@$SERVER_IP << 'EOF'
