@@ -21,8 +21,8 @@ RUN pnpm run build:web
 
 
 FROM node:lts
-ARG DATABASE_URL
-ENV DATABASE_URL=$DATABASE_URL
+ARG PURE_DATABASE_URL
+ENV DATABASE_URL=$PURE_DATABASE_URL
 RUN apt update && \
     apt install -y --no-install-recommends \
       curl \
