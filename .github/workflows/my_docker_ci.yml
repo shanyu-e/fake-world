@@ -95,14 +95,14 @@ jobs:
         run: |
           SERVER_USER="root"
           SERVER_IP="${{ secrets.PROD_SERVER_IP }}"
-          DOCKER_COMPOSE_PATH="/opt/1panel/docker/compose/dj-fake-world/docker-compose.yml"
+          DOCKER_COMPOSE_PATH="/opt/1panel/docker/compose/dj-fake-world"
           IMAGE_NAME="docker.1ms.run/${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO }}"
           FIXED_TAG="${{ needs.build_and_deploy_job.outputs.fixed_tag }}"
 
           # 通过 SSH 执行部署命令（一行一个命令，用 && 连接）
           ssh -T -o StrictHostKeyChecking=no -p 10022 $SERVER_USER@$SERVER_IP "
             docker pull $IMAGE_NAME:$FIXED_TAG && \
-            cd $(dirname $DOCKER_COMPOSE_PATH) && \
+            cd $DOCKER_COMPOSE_PATH && \
             docker-compose up -d --build && \
             docker-compose ps && \
             echo '✅ 部署成功！当前使用镜像：$IMAGE_NAME:$FIXED_TAG'
