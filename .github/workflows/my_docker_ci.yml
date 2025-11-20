@@ -86,6 +86,12 @@ jobs:
     needs: build_and_deploy_job  # 只有构建推送成功才执行部署
     runs-on: ubuntu-latest
     steps:
+      - name: 拉取代码
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+          lfs: false
+
       - name: 配置 SSH（连接目标服务器）
         uses: webfactory/ssh-agent@v0.5.4
         with:
@@ -100,10 +106,14 @@ jobs:
           FIXED_TAG="${{ needs.build_and_deploy_job.outputs.fixed_tag }}"
 
           # 通过 SSH 执行部署命令（一行一个命令，用 && 连接）
+          scp -o StrictHostKeyChecking=no -P 10022 ./docker-compose.yml $SERVER_USER@$SERVER_IP:$DOCKER_COMPOSE_PATH
+
+          ssh -T -o StrictHostKeyChecking=no -p 10022 $SERVER_USER@$SERVER_IP "sed -i 's/\${FIXED_TAG}/'$FIXED_TAG'/g' $DOCKER_COMPOSE_PATH/docker-compose.yml"
+
           ssh -T -o StrictHostKeyChecking=no -p 10022 $SERVER_USER@$SERVER_IP "
             docker pull $IMAGE_NAME:$FIXED_TAG && \
             cd $DOCKER_COMPOSE_PATH && \
-            docker-compose up -d --build && \
+            docker-compose up -d && \
             docker-compose ps && \
             echo '✅ 部署成功！当前使用镜像：$IMAGE_NAME:$FIXED_TAG'
           "
