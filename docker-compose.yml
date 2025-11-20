@@ -1,0 +1,20 @@
+services:
+  dataease:
+    image: docker.1ms.run/chinadengjing/fake-world:${FIXED_TAG}
+    restart: always
+    container_name: dj-fake-world
+    ports:
+      - 10006:80
+      - 10009:9000
+    volumes:
+      - ./data:/code
+    environment:
+      MAXKB_EXTERNAL_PGSQL: true
+    networks:
+      - 1panel-network
+    labels:
+      createdBy: "DJ"
+
+networks:
+  1panel-network:
+    external: true

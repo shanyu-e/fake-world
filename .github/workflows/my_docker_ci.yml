@@ -1,0 +1,119 @@
+name: DJ's Docker CI/CD
+
+on:
+  push:
+    branches:
+      - release
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches:
+      - release
+
+jobs:
+  build_and_deploy_job:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+    runs-on: ubuntu-latest
+    name: Build and Deploy Job
+    outputs:
+      fixed_tag: ${{ github.run_number }}
+    steps:
+      # 步骤1：拉取仓库代码到运行环境
+      - name: 拉取代码
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+          lfs: false
+      
+      # 步骤2：配置 Docker Buildx（优化构建，支持多平台可选）
+      - name: 配置 Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      # 步骤3：登录 Docker Hub（使用 Secrets 中的凭证，避免硬编码）
+      - name: 登录 Docker Hub
+        id: docker_login
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+        env:
+          DEBUG_MODE: true  # 启用调试模式
+
+      # 步骤3-1：显示登录状态
+      - name: 检查登录状态
+        run: |
+          echo "登录步骤状态码: ${{ steps.docker_login.outcome }}"
+          echo "Docker Hub 用户名: ${{ secrets.DOCKER_HUB_USERNAME }}"
+          echo "登录详细信息: ${{ toJSON(steps.docker_login.outputs) }}"
+          echo "GitHub Runner IP: $(curl -s ifconfig.me)"
+          echo "当前时间戳: $(date +%s)"
+          echo "DATABASE_URL is ${{ secrets.DATABASE_URL }}"
+
+      # 步骤4：生成镜像标签（latest + 日期标签，方便版本追溯）
+      - name: 生成镜像标签
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO }}  # 镜像完整路径（用户名/仓库名）
+          tags: |
+            latest
+            ${{ github.sha }}
+            ${{ github.run_number }}
+            type=raw,value={{date 'YYYYMMDD'}}
+
+      # 步骤5：构建 Docker 镜像并推送到 Docker Hub
+      - name: 构建并推送镜像
+        uses: docker/build-push-action@v5
+        with:
+          context: .  # 构建上下文（仓库根目录，即 Dockerfile 所在目录）
+          file: ./Dockerfile  # Dockerfile 路径（根目录直接写 ./Dockerfile）
+          push: true  # 启用「推送镜像」（false 仅构建不推送，测试时可改为 false）
+          tags: ${{ steps.meta.outputs.tags }}  # 引用步骤4生成的所有标签
+          cache-from: type=gha  # 启用 GitHub Actions 缓存（加速下次构建）
+          cache-to: type=gha,mode=max  # 缓存最大化（包含所有构建层）
+          build-args: |
+            DATABASE_URL=${{ secrets.DATABASE_URL }}
+            PURE_DATABASE_URL=${{ secrets.PURE_DATABASE_URL }}
+
+      # 步骤6：验证推送结果（可选，方便排查问题）
+      - name: 验证镜像推送成功
+        run: |
+          echo "镜像标签列表："
+          echo "${{ steps.meta.outputs.tags }}"
+          echo "✅ 镜像已成功推送到 Docker Hub：https://hub.docker.com/r/${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO }}"
+          
+  # 新增：部署到正式环境（依赖 build_and_deploy_job 成功）
+  deploy-to-production:
+    needs: build_and_deploy_job  # 只有构建推送成功才执行部署
+    runs-on: ubuntu-latest
+    steps:
+      - name: 拉取代码
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+          lfs: false
+
+      - name: 配置 SSH（连接目标服务器）
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}  # 目标服务器的 SSH 私钥（存 Secrets）
+
+      - name: 连接服务器，拉取镜像并重启 Docker Compose
+        run: |
+          SERVER_USER="root"
+          SERVER_IP="${{ secrets.PROD_SERVER_IP }}"
+          DOCKER_COMPOSE_PATH="/opt/1panel/docker/compose/dj-fake-world"
+          IMAGE_NAME="docker.1ms.run/${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO }}"
+          FIXED_TAG="${{ needs.build_and_deploy_job.outputs.fixed_tag }}"
+
+          # 通过 SSH 执行部署命令（一行一个命令，用 && 连接）
+          scp -o StrictHostKeyChecking=no -P 10022 ./docker-compose.yml $SERVER_USER@$SERVER_IP:$DOCKER_COMPOSE_PATH
+
+          ssh -T -o StrictHostKeyChecking=no -p 10022 $SERVER_USER@$SERVER_IP "sed -i 's/\${FIXED_TAG}/'$FIXED_TAG'/g' $DOCKER_COMPOSE_PATH/docker-compose.yml"
+
+          ssh -T -o StrictHostKeyChecking=no -p 10022 $SERVER_USER@$SERVER_IP "
+            docker pull $IMAGE_NAME:$FIXED_TAG && \
+            cd $DOCKER_COMPOSE_PATH && \
+            docker-compose up -d && \
+            docker-compose ps && \
+            echo '✅ 部署成功！当前使用镜像：$IMAGE_NAME:$FIXED_TAG'
+          "

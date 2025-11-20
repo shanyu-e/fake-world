@@ -31,7 +31,7 @@ const TextReference = ({ referenceId, conversationItemId }: Props) => {
 			friendId: id!,
 			conversationId: referenceId!,
 		}),
-	);
+	)?.find((v) => v.id === referenceId);
 	const setConversationList = useSetAtom(conversationListAtom(id!));
 	const setActivatedNode = useSetAtom(activatedNodeAtom);
 
