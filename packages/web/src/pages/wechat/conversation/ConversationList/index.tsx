@@ -8,12 +8,13 @@ import {
 	type TConversationItem,
 	conversationListAtom,
 	getConversationListValueSnapshot,
+	loadAllConversations,
 } from "@/stateV2/conversation";
 import { EMetaDataType, type StaticMetaData, allNodesTreeAtom } from "@/stateV2/detectedNode";
 import { SubnodeOutlined } from "@ant-design/icons";
 import { Modal, Tooltip } from "antd";
 import { useAtom, useSetAtom } from "jotai";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { ReactSortable } from "react-sortablejs";
 import { twJoin } from "tailwind-merge";
 import { useConversationAPI } from "../context";
@@ -32,6 +33,26 @@ const ConversationList = () => {
 			id: item.id,
 		}));
 	}, [conversationList]);
+
+	useEffect(() => {
+		// 立即执行一次加载
+		const fetchData = async () => {
+			try {
+				await loadAllConversations();
+			} catch (error) {
+				console.error("Failed to refresh conversation data:", error);
+			}
+		};
+		
+		// 立即执行一次
+		fetchData();
+		
+		// 设置定时器，每5000毫秒执行一次
+		const intervalId = setInterval(fetchData, 5000);
+		
+		// 清除定时器
+		return () => clearInterval(intervalId);
+	}, [conversationId]);
 
 	const handleOperationDelete = (id: TConversationItem["id"]) => {
 		Modal.confirm({

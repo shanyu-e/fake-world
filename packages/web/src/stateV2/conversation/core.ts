@@ -111,6 +111,9 @@ export const loadAllConversations = async () => {
 				...base,
 				type: raw.type,
 				// 尝试映射常见字段；实际可根据后端返回类型细化
+				simpleContent: raw.simpleContent,
+				extraClassName: raw.extraClassName,
+				note: raw.note,
 				imageInfo: raw.imageInfo,
 				videoInfo: raw.videoInfo,
 				duration: raw.duration,
