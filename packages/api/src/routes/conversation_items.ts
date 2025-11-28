@@ -1,5 +1,6 @@
 import { Elysia, t } from "elysia";
 import { prisma } from "../db";
+import { serializeData } from "../provider";
 
 interface ApiResponse<T> {
 	data: T;
@@ -78,9 +79,14 @@ export const conversationItemsRoutes = new Elysia({ prefix: "/conversation_items
 					where: whereCondition,
 				}),
 			]);
-			return createPaginatedResponse(conversationItems, page, limit, total);
+
+			// 确保数据可序列化
+			return createPaginatedResponse(serializeData(conversationItems), page, limit, total);
 		} catch (error) {
-			console.error("Failed to fetch conversation items:", error);
+			console.error(
+				"Failed to fetch conversation items:",
+				error instanceof Error ? error.message : String(error),
+			);
 			return createResponse(null, "Failed to fetch conversation items", -1);
 		}
 	})
@@ -101,7 +107,10 @@ export const conversationItemsRoutes = new Elysia({ prefix: "/conversation_items
 				return createResponse(null, "Conversation item not found", -1);
 			}
 
-			return createResponse(conversationItem);
+			return createResponse(
+				serializeData(conversationItem),
+				"Conversation item fetched successfully",
+			);
 		} catch (error) {
 			console.error("Failed to fetch conversation item:", error);
 			return createResponse(null, "Failed to fetch conversation item", -1);
@@ -113,48 +122,82 @@ export const conversationItemsRoutes = new Elysia({ prefix: "/conversation_items
 		"/",
 		async ({ body }) => {
 			try {
-				const conversationItem = await prisma.conversation_items.create({
-					data: {
-						id: crypto.randomUUID(),
-						...body,
-					},
-				});
+				const createdItems: any[] = [];
+				for (const key in body) {
+					for (const item of body[key]) {
+						const conversationItem = await prisma.conversation_items.create({
+							data: {
+								id: crypto.randomUUID(), // 使用UUID生成唯一ID
+								dialogue_id: item.dialogue_id,
+								type: item.type,
+								role: item.role,
+								send_timestamp: item.send_timestamp ?? "",
+								upper_text: item.upper_text,
+								text_content: item.text_content,
+								reference_id: item.reference_id,
+								simple_content: item.simple_content,
+								extra_class_name: item.extra_class_name,
+								transfer_status: item.transfer_status,
+								original_sender: item.original_sender ?? "",
+								red_packet_status: item.red_packet_status,
+								amount: item.amount ?? "",
+								note: item.note ?? "",
+								red_packet_id: item.red_packet_id ?? "",
+								image_info: item.image_info,
+								video_info: item.video_info,
+								duration: item.duration ?? "",
+								is_read: item.is_read ?? false,
+								show_stt: item.show_stt ?? false,
+								stt: item.stt ?? "",
+								avatar_info: item.avatar_info ?? "",
+								nickname: item.nickname ?? "",
+							},
+						});
 
-				return createResponse(conversationItem, "Conversation item created successfully");
+						createdItems.push(conversationItem);
+					}
+				}
+				return createResponse(
+					serializeData(createdItems),
+					"Conversation item(s) created successfully",
+				);
 			} catch (error) {
 				console.error("Failed to create conversation item:", error);
 				return createResponse(null, "Failed to create conversation item", -1);
 			}
 		},
 		{
-			body: t.Object({
-				dialogue_id: t.String(),
-				type: t.String(),
-				role: t.String(),
-				send_timestamp: t.Optional(t.Number()),
-				upper_text: t.Optional(t.String()),
-				text_content: t.Optional(t.Any()),
-				reference_id: t.Optional(t.String()),
-				simple_content: t.Optional(t.String()),
-				extra_class_name: t.Optional(t.String()),
-				original_sender: t.Optional(t.String()),
-				transfer_status: t.Optional(t.String()),
-				transfer_amount: t.Optional(t.String()), // 使用String因为Decimal类型在API传输中需要特殊处理
-				transfer_note: t.Optional(t.String()),
-				red_packet_original_sender: t.Optional(t.String()),
-				red_packet_status: t.Optional(t.String()),
-				red_packet_amount: t.Optional(t.String()), // 使用String因为Decimal类型在API传输中需要特殊处理
-				red_packet_note: t.Optional(t.String()),
-				red_packet_id: t.Optional(t.String()),
-				image_info: t.Optional(t.String()),
-				video_info: t.Optional(t.String()),
-				voice_duration: t.Optional(t.Number()),
-				voice_is_read: t.Optional(t.Boolean()),
-				voice_show_stt: t.Optional(t.Boolean()),
-				voice_stt: t.Optional(t.String()),
-				personal_card_avatar_info: t.Optional(t.String()),
-				personal_card_nickname: t.Optional(t.String()),
-			}),
+			body: t.Record(
+				t.String(),
+				t.Array(
+					t.Object({
+						id: t.String(),
+						dialogue_id: t.String(),
+						type: t.String(),
+						role: t.String(),
+						send_timestamp: t.Optional(t.String()),
+						upper_text: t.Optional(t.String()),
+						text_content: t.Optional(t.Any()),
+						reference_id: t.Optional(t.String()),
+						simple_content: t.Optional(t.String()),
+						extra_class_name: t.Optional(t.String()),
+						original_sender: t.Optional(t.String()),
+						transfer_status: t.Optional(t.String()),
+						amount: t.Optional(t.String()),
+						note: t.Optional(t.String()),
+						red_packet_status: t.Optional(t.String()),
+						red_packet_id: t.Optional(t.String()),
+						image_info: t.Optional(t.String()),
+						video_info: t.Optional(t.String()),
+						duration: t.Optional(t.String()),
+						is_read: t.Optional(t.Boolean()),
+						stt: t.Optional(t.String()),
+						show_stt: t.Optional(t.Boolean()),
+						avatar_info: t.Optional(t.String()),
+						nickname: t.Optional(t.String()),
+					}),
+				),
+			),
 		},
 	)
 
@@ -163,6 +206,10 @@ export const conversationItemsRoutes = new Elysia({ prefix: "/conversation_items
 		"/:id",
 		async ({ params, body, query }) => {
 			const updatedConversations = [];
+
+			const page = Number.parseInt(query.page as string) || 1;
+			const limit = Number.parseInt(query.limit as string) || 50;
+			const skip = (page - 1) * limit;
 
 			for (const key in body) {
 				for (const item of body[key]) {
@@ -197,7 +244,7 @@ export const conversationItemsRoutes = new Elysia({ prefix: "/conversation_items
 							dialogue_id: item.dialogue_id,
 							type: item.type,
 							role: item.role,
-							send_timestamp: item.send_timestamp,
+							send_timestamp: item.send_timestamp ?? "",
 							upper_text: item.upper_text,
 							text_content: item.text_content,
 							reference_id: item.reference_id,
@@ -211,7 +258,7 @@ export const conversationItemsRoutes = new Elysia({ prefix: "/conversation_items
 							red_packet_id: item.red_packet_id,
 							image_info: item.image_info,
 							video_info: item.video_info,
-							duration: item.duration,
+							duration: item.duration ?? "",
 							is_read: item.is_read,
 							show_stt: item.show_stt,
 							stt: item.stt,
@@ -222,7 +269,17 @@ export const conversationItemsRoutes = new Elysia({ prefix: "/conversation_items
 					updatedConversations.push(conversation);
 				}
 			}
-			return createResponse(updatedConversations, "Conversation items updated successfully");
+			try {
+				return createPaginatedResponse(
+					serializeData(updatedConversations),
+					page,
+					limit,
+					updatedConversations.length,
+				);
+			} catch (error) {
+				console.error("Failed to update conversation items:", error);
+				return createResponse(null, "Failed to update conversation items", -1);
+			}
 		},
 		{
 			body: t.Record(
@@ -233,7 +290,7 @@ export const conversationItemsRoutes = new Elysia({ prefix: "/conversation_items
 						dialogue_id: t.String(),
 						type: t.String(),
 						role: t.String(),
-						send_timestamp: t.Optional(t.Number()),
+						send_timestamp: t.Optional(t.String()),
 						upper_text: t.Optional(t.String()),
 						text_content: t.Optional(t.Any()),
 						reference_id: t.Optional(t.String()),
@@ -247,10 +304,10 @@ export const conversationItemsRoutes = new Elysia({ prefix: "/conversation_items
 						red_packet_id: t.Optional(t.String()),
 						image_info: t.Optional(t.String()),
 						video_info: t.Optional(t.String()),
-						duration: t.Optional(t.Number()),
+						duration: t.Optional(t.String()),
 						is_read: t.Optional(t.Boolean()),
 						stt: t.Optional(t.String()),
-						show_stt: t.Optional(t.String()),
+						show_stt: t.Optional(t.Boolean()),
 						avatar_info: t.Optional(t.String()),
 						nickname: t.Optional(t.String()),
 					}),

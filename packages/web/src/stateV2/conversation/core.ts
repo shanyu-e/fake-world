@@ -90,7 +90,7 @@ export const loadAllConversations = async () => {
 			dialogueId: String(raw.dialogueId),
 			role: raw.role,
 			upperText: raw.upperText ?? undefined,
-			sendTimestamp: raw.sendTimestamp ?? undefined,
+			sendTimestamp: String(raw.sendTimestamp),
 		} as any;
 
 		// 类型映射（目前主要兼容 text）
@@ -116,12 +116,14 @@ export const loadAllConversations = async () => {
 				note: raw.note,
 				imageInfo: raw.imageInfo,
 				videoInfo: raw.videoInfo,
-				duration: raw.duration,
+				transferStatus: raw.transferStatus,
+				duration: raw.duration.toString(),
 				stt: raw.stt,
 				showStt: raw.showStt,
 				amount: raw.amount,
 				originalSender: raw.originalSender,
 				redPacketStatus: raw.redPacketStatus,
+				redPacketId: raw.redPacketId,
 				avatarInfo: raw.avatarInfo,
 				nickname: raw.nickname,
 			} as any);

@@ -145,24 +145,30 @@ export const conversationsRoutes = new Elysia({ prefix: "/conversations" })
 						continue;
 					}
 					for (const item of body[key]) {
-						const conversation = await prisma.conversation.upsert({
+						const conversation = await prisma.conversation_items.upsert({
 							//  upsert 操作，根据 id 和 dialogueId li 唯一确定一条记录
-							where: { id_dialogueId: { id: item.id, dialogueId: item.dialogueId } },
+							where: { id_dialogue_id: { id: item.id, dialogue_id: item.dialogueId } },
 							update: {
 								role: item.role,
 								type: item.type,
-								upperText: item.upperText,
-								content: item.textContent,
-								referenceId: item.referenceId,
+								upper_text: item.upperText,
+								text_content: item.textContent,
+								reference_id: item.referenceId,
+								duration: item.duration,
+								stt: item.stt,
 							},
 							create: {
 								id: item.id,
-								dialogueId: item.dialogueId,
+								dialogue_id: item.dialogueId,
 								role: item.role,
 								type: item.type,
-								upperText: item.upperText,
-								content: item.textContent,
-								referenceId: item.referenceId,
+								upper_text: item.upperText,
+								text_content: item.textContent,
+								reference_id: item.referenceId,
+								duration: item.duration ?? "",
+								show_stt: item.showStt ?? false,
+								send_timestamp: item.sendTimestamp ?? "",
+								stt: item.stt,
 							},
 						});
 						updatedConversations.push(conversation);
@@ -187,6 +193,10 @@ export const conversationsRoutes = new Elysia({ prefix: "/conversations" })
 						// 根据 TConversationItem 类型添加其他可能的字段
 						textContent: t.Optional(t.Any()),
 						referenceId: t.Optional(t.String()),
+						sendTimestamp: t.Optional(t.String()),
+						duration: t.Optional(t.String()),
+						showStt: t.Optional(t.Boolean()),
+						stt: t.Optional(t.String()),
 					}),
 				), // 值类型：TStateConversationList (TConversationItem[])
 			),

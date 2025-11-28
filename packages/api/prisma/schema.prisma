@@ -155,7 +155,7 @@ model conversation_items {
   dialogue_id       String   @db.VarChar(64)
   type              String   @db.VarChar(32)
   role              String   @db.VarChar(16)
-  send_timestamp    Int?
+  send_timestamp    String?  @db.VarChar(64)
   upper_text        String?
   text_content      Json?
   reference_id      String?  @db.VarChar(64)
@@ -169,10 +169,10 @@ model conversation_items {
   red_packet_id     String?  @db.VarChar(64)
   image_info        String?
   video_info        String?
-  duration          Int?
+  duration          String?  @db.VarChar(64)
   is_read           Boolean?
   stt               String?
-  show_stt          String?
+  show_stt          Boolean?
   avatar_info       String?
   nickname          String?
 
