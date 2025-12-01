@@ -218,7 +218,7 @@ const ConversationItemMetaDataEditor = ({ data, index }: EditorProps<TConversati
         label="发送时间"
         getValueProps={(v) => {
           return {
-            value: v ? dayjs(v).format("YYYY-MM-DD HH:mm:ss") : "初始消息，没有时间信息",
+            value: v ? dayjs(typeof v === "string" ? Number(v) : v).format("YYYY-MM-DD HH:mm:ss") : "初始消息，没有时间信息",
           };
         }}
       >

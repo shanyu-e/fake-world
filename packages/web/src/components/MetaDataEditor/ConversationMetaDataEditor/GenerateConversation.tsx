@@ -60,7 +60,7 @@ const GenerateConversation = ({ friendId, scrollToBtm }: Props) => {
             (m) =>
               ({
                 id: nanoid(8),
-                sendTimestamp: dayjs().valueOf(),
+                sendTimestamp: dayjs().valueOf().toString(),
                 type: EConversationType.text,
                 role: m?.role ?? "mine",
                 textContent: [

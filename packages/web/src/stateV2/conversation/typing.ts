@@ -18,7 +18,7 @@ export interface IConversationItemBase {
   id: string;
   dialogueId: string;
   upperText?: string;
-  sendTimestamp?: number;
+  sendTimestamp?: string;
   role: TConversationRole;
 }
 
@@ -67,7 +67,7 @@ export interface ICoversationTypeVideo extends IConversationItemBase {
 
 export interface IConversationTypeVoice extends IConversationItemBase {
   type: EConversationType.voice;
-  duration: number;
+  duration: string;
   isRead?: boolean;
   /** 是否显示语音转文字内容 */
   showStt?: boolean;
